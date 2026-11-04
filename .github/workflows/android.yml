@@ -44,7 +44,8 @@ jobs:
       - name: Build native library
         run: |
           set -o pipefail
-          cmake --build build-android -j"$(nproc)" --target Spaghettify 2>&1 | tee build.log
+          # "-k 0": keep going after a failure so one run reports every error.
+          cmake --build build-android -j"$(nproc)" --target Spaghettify -- -k 0 2>&1 | tee build.log
 
       - name: Collect native libraries and SDL Java sources
         run: |
