@@ -5,6 +5,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 
 import android.os.Bundle;
+import android.view.ViewGroup;
+import android.widget.RelativeLayout;
 
 import org.libsdl.app.SDLActivity;
 
@@ -23,6 +25,18 @@ public class MainActivity extends SDLActivity {
         saveLogOfPreviousRun();
         installBundledEngineAssets();
         super.onCreate(savedInstanceState);
+
+        // On-screen controls, drawn over the game surface (mLayout is SDLActivity's root).
+        // They need explicit full-screen size: a bare addView() would make a 0x0 view.
+        // Controls are optional: a failure here must never stop the game from starting.
+        try {
+            if (mLayout != null) {
+                mLayout.addView(new TouchControlsView(this),
+                        new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                        ViewGroup.LayoutParams.MATCH_PARENT));
+            }
+        } catch (Throwable ignored) {
+        }
     }
 
     /**
