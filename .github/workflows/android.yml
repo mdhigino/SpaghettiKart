@@ -64,15 +64,19 @@ jobs:
           mkdir -p android/app/src/main/java/org
           cp -r "$SDL_SRC/android-project/app/src/main/java/org/libsdl" android/app/src/main/java/org/
 
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
-
       - name: Build APK
         run: |
-          set -o pipefail
+          exec > >(tee gradle.log) 2>&1
+          set -x
+          # Gradle 8.9 is what Android Gradle Plugin 8.7 needs (the runner's own Gradle is newer).
+          curl -fsSL -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-8.9-bin.zip
+          unzip -q /tmp/gradle.zip -d /opt
+          export PATH=/opt/gradle-8.9/bin:$PATH
+          gradle --version
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          ls "$ANDROID_HOME" "$ANDROID_HOME/platforms" || true
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
-          gradle -p android assembleDebug --no-daemon --stacktrace 2>&1 | tee gradle.log
+          gradle -p android assembleDebug --no-daemon --stacktrace
 
       - uses: actions/upload-artifact@v4
         with:
