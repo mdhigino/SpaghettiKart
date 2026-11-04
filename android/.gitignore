@@ -3,4 +3,5 @@ build/
 local.properties
 # Filled in by the CI workflow (or by hand, see README.md):
 app/src/main/jniLibs/
+app/src/main/assets/
 app/src/main/java/org/

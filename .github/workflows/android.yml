@@ -29,6 +29,25 @@ jobs:
           cmake --version
           echo "NDK: ${ANDROID_NDK_LATEST_HOME:-$ANDROID_NDK_HOME}"
 
+      # spaghetti.o2r holds the port's own assets (shaders, fonts, tracks...). It must be
+      # the same version as the code, so it is generated here with the Torch tool from
+      # this exact commit and bundled into the APK. It contains nothing from the ROM.
+      - name: Generate spaghetti.o2r with Torch (host build)
+        run: |
+          exec > >(tee torch.log) 2>&1
+          set -x
+          sudo apt-get install -y libsdl2-dev libpng-dev libzip-dev nlohmann-json3-dev libtinyxml2-dev libspdlog-dev libboost-dev
+          cmake -S torch -B build-torch -G Ninja -DCMAKE_BUILD_TYPE=Release \
+            -DUSE_STANDALONE=ON -DBUILD_STORMLIB=OFF -DBUILD_SM64=OFF -DBUILD_MK64=ON \
+            -DBUILD_SF64=OFF -DBUILD_FZERO=OFF -DBUILD_MARIO_ARTIST=OFF -DBUILD_NAUDIO=ON \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5
+          cmake --build build-torch -j"$(nproc)"
+          ./build-torch/torch pack assets spaghetti.o2r o2r
+          ls -l spaghetti.o2r
+          python3 -c "import zipfile; n=zipfile.ZipFile('spaghetti.o2r').namelist(); print('entries:', len(n)); print([x for x in n if 'shader' in x])"
+          mkdir -p android/app/src/main/assets
+          cp spaghetti.o2r android/app/src/main/assets/spaghetti.o2r
+
       - name: Configure native build (arm64)
         run: |
           set -o pipefail
@@ -89,7 +108,7 @@ jobs:
         run: |
           mkdir -p /tmp/cilogs && cd /tmp/cilogs
           git init -q
-          for f in configure.log build.log collect.log gradle.log; do
+          for f in torch.log configure.log build.log collect.log gradle.log; do
             if [ -f "$GITHUB_WORKSPACE/$f" ]; then
               tail -n 300 "$GITHUB_WORKSPACE/$f" > "$f.tail.txt"
               # Keep the LAST matches: the real failure is almost always at the end.
