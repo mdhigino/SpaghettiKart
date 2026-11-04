@@ -23,6 +23,16 @@ elseif(ANDROID)
     GIT_TAG v1.3.7
     OVERRIDE_FIND_PACKAGE)
   FetchContent_MakeAvailable(vorbis)
+  # When built as subprojects the Ogg::/Vorbis:: namespaced targets are only
+  # created at install time, so provide them here.
+  if(TARGET ogg AND NOT TARGET Ogg::ogg)
+    add_library(Ogg::ogg ALIAS ogg)
+  endif()
+  foreach(vorbis_target vorbis vorbisenc vorbisfile)
+    if(TARGET ${vorbis_target} AND NOT TARGET Vorbis::${vorbis_target})
+      add_library(Vorbis::${vorbis_target} ALIAS ${vorbis_target})
+    endif()
+  endforeach()
 else()
   find_package(Ogg REQUIRED)
   find_package(Vorbis REQUIRED)
