@@ -37,6 +37,13 @@ if(IOS OR CMAKE_SYSTEM_NAME STREQUAL "iOS")
   set(PROJECT_ID "dev.net64.game")
 endif()
 
+# Android always uses OpenGL ES, and static libs must be position independent
+# because everything ends up inside libmain.so.
+if(ANDROID)
+  set(USE_OPENGLES ON CACHE BOOL "Use OpenGLES instead of Desktop OpenGL" FORCE)
+  set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif()
+
 # Toggle for GLES (Required for many ARM/Mobile platforms)
 option(USE_OPENGLES "Use OpenGLES instead of Desktop OpenGL" OFF)
 
@@ -126,7 +133,13 @@ if(SPAGHETTIKART_IOS)
 
 endif()
 
-add_executable(${PROJECT_NAME} ${ALL_FILES})
+if(ANDROID)
+  # SDLActivity loads libSDL2.so and then libmain.so, which must export SDL_main.
+  add_library(${PROJECT_NAME} SHARED ${ALL_FILES})
+  set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME main)
+else()
+  add_executable(${PROJECT_NAME} ${ALL_FILES})
+endif()
 target_include_directories(
   ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                           ${CMAKE_CURRENT_SOURCE_DIR}/include
@@ -159,6 +172,10 @@ endif()
 include(cmake/dependencies/common.cmake)
 
 include(cmake/dependencies/FindLib.cmake)
+
+if(ANDROID)
+  target_link_libraries(${PROJECT_NAME} PRIVATE log android)
+endif()
 
 # fmt's consteval format-string checking fails to compile under newer
 # AppleClang (Xcode 16+) with the spdlog/fmt versions in use (both vcpkg's on
@@ -207,7 +224,7 @@ endif()
 # On macOS these live in the .app's Contents/Resources instead (see
 # cmake/macos/apple_bundle.cmake); copying them next to the executable would
 # just duplicate them inside Contents/MacOS.
-if(NOT CMAKE_SYSTEM_NAME MATCHES "Darwin")
+if(NOT CMAKE_SYSTEM_NAME MATCHES "Darwin" AND NOT ANDROID)
 add_custom_command(
   TARGET ${PROJECT_NAME}
   POST_BUILD
@@ -219,7 +236,9 @@ add_custom_command(
   VERBATIM)
 endif()
 
-if(NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch")
+# The Torch asset extractor is a host tool: on Android the .o2r files are
+# generated on a PC and copied to the phone, so none of this is built there.
+if(NOT CMAKE_SYSTEM_NAME STREQUAL "NintendoSwitch" AND NOT ANDROID)
   include(ExternalProject)
   # Torch's pinned spdlog bundles an fmt that trips a consteval error under
   # newer AppleClang (Xcode 16+): "call to consteval function

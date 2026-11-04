@@ -1023,7 +1023,7 @@ void CM_ThrowRuntimeError(const char* fmt, ...) {
 #ifdef _WIN32
 int SDL_main(int argc, char** argv) {
 #else
-#if defined(__cplusplus) && defined(PLATFORM_IOS)
+#if defined(__cplusplus) && (defined(PLATFORM_IOS) || defined(__ANDROID__))
 extern "C"
 #endif
     int

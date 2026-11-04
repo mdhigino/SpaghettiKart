@@ -7,6 +7,22 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "CafeOS")
   set(ADDITIONAL_LIBRARY_DEPENDENCIES "$<$<CONFIG:Debug>:-Wl,--wrap=abort>")
   target_include_directories(${PROJECT_NAME} PRIVATE
                              ${DEVKITPRO}/portlibs/wiiu/include/)
+elseif(ANDROID)
+  # No system Ogg/Vorbis on Android: build them from source.
+  set(BUILD_SHARED_LIBS OFF)
+  set(BUILD_TESTING OFF)
+  FetchContent_Declare(
+    ogg
+    GIT_REPOSITORY https://github.com/xiph/ogg.git
+    GIT_TAG v1.3.5
+    OVERRIDE_FIND_PACKAGE)
+  FetchContent_MakeAvailable(ogg)
+  FetchContent_Declare(
+    vorbis
+    GIT_REPOSITORY https://github.com/xiph/vorbis.git
+    GIT_TAG v1.3.7
+    OVERRIDE_FIND_PACKAGE)
+  FetchContent_MakeAvailable(vorbis)
 else()
   find_package(Ogg REQUIRED)
   find_package(Vorbis REQUIRED)

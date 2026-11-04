@@ -1,0 +1,94 @@
+name: Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [android-port]
+
+permissions:
+  contents: write # needed only to publish build logs to the ci-logs branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build python3
+          cmake --version
+          echo "NDK: ${ANDROID_NDK_LATEST_HOME:-$ANDROID_NDK_HOME}"
+
+      - name: Configure native build (arm64)
+        run: |
+          set -o pipefail
+          NDK="${ANDROID_NDK_LATEST_HOME:-$ANDROID_NDK_HOME}"
+          cmake -S . -B build-android -G Ninja \
+            -DCMAKE_TOOLCHAIN_FILE="$NDK/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI=arm64-v8a \
+            -DANDROID_PLATFORM=android-24 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DUSE_OPENGLES=ON 2>&1 | tee configure.log
+
+      - name: Build native library
+        run: |
+          set -o pipefail
+          cmake --build build-android -j"$(nproc)" --target Spaghettify 2>&1 | tee build.log
+
+      - name: Collect native libraries and SDL Java sources
+        run: |
+          NDK="${ANDROID_NDK_LATEST_HOME:-$ANDROID_NDK_HOME}"
+          JNI=android/app/src/main/jniLibs/arm64-v8a
+          mkdir -p "$JNI"
+          find build-android \( -name libmain.so -o -name libSDL2.so -o -name libhidapi.so \) -exec cp -v {} "$JNI"/ \;
+          ls -l "$JNI"
+          test -f "$JNI/libmain.so" && test -f "$JNI/libSDL2.so"
+          "$NDK/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip" --strip-unneeded "$JNI"/*.so
+          SDL_SRC="$(find build-android/_deps -maxdepth 1 -type d -name 'sdl2-src' | head -n 1)"
+          echo "SDL source: $SDL_SRC"
+          mkdir -p android/app/src/main/java/org
+          cp -r "$SDL_SRC/android-project/app/src/main/java/org/libsdl" android/app/src/main/java/org/
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build APK
+        run: |
+          set -o pipefail
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+          gradle -p android assembleDebug --no-daemon --stacktrace 2>&1 | tee gradle.log
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MK64Familia-android-debug
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: Publish build logs to the ci-logs branch
+        if: always()
+        run: |
+          mkdir -p /tmp/cilogs && cd /tmp/cilogs
+          git init -q
+          for f in configure.log build.log gradle.log; do
+            if [ -f "$GITHUB_WORKSPACE/$f" ]; then
+              tail -n 300 "$GITHUB_WORKSPACE/$f" > "$f.tail.txt"
+              grep -n -E "error|Error|FAILED|CMake Error|undefined reference|fatal" -A3 "$GITHUB_WORKSPACE/$f" | head -n 400 > "$f.errors.txt" || true
+            fi
+          done
+          echo "run=${{ github.run_id }} status=${{ job.status }} sha=${{ github.sha }}" > STATUS.txt
+          git config user.name "github-actions"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "CI logs for run ${{ github.run_id }}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:refs/heads/ci-logs

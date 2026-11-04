@@ -1,0 +1,41 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'dev.mdhigino.mk64family'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'dev.mdhigino.mk64family'
+        minSdk 24
+        targetSdk 35
+        versionCode 1
+        versionName '0.1.0'
+
+        ndk {
+            abiFilters 'arm64-v8a'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    // The native libraries (libmain.so, libSDL2.so, ...) are built by CMake
+    // outside of Gradle and dropped here, see .github/workflows/android.yml.
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['src/main/jniLibs']
+        }
+    }
+
+    packaging {
+        jniLibs {
+            // Extract the .so files to disk so MainActivity can check for libhidapi.so.
+            useLegacyPackaging = true
+        }
+    }
+}
