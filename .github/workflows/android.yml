@@ -49,9 +49,12 @@ jobs:
 
       - name: Collect native libraries and SDL Java sources
         run: |
+          exec > >(tee collect.log) 2>&1
+          set -x
           NDK="${ANDROID_NDK_LATEST_HOME:-$ANDROID_NDK_HOME}"
           JNI=android/app/src/main/jniLibs/arm64-v8a
           mkdir -p "$JNI"
+          find build-android -name '*.so' -print
           find build-android \( -name libmain.so -o -name libSDL2.so -o -name libhidapi.so \) -exec cp -v {} "$JNI"/ \;
           ls -l "$JNI"
           test -f "$JNI/libmain.so" && test -f "$JNI/libSDL2.so"
@@ -82,10 +85,11 @@ jobs:
         run: |
           mkdir -p /tmp/cilogs && cd /tmp/cilogs
           git init -q
-          for f in configure.log build.log gradle.log; do
+          for f in configure.log build.log collect.log gradle.log; do
             if [ -f "$GITHUB_WORKSPACE/$f" ]; then
               tail -n 300 "$GITHUB_WORKSPACE/$f" > "$f.tail.txt"
-              grep -n -E "error|Error|FAILED|CMake Error|undefined reference|fatal" -A3 "$GITHUB_WORKSPACE/$f" | head -n 400 > "$f.errors.txt" || true
+              # Keep the LAST matches: the real failure is almost always at the end.
+              grep -n -E "error:|FAILED|CMake Error|undefined reference|undefined symbol|fatal|No such file|not found|What went wrong" -A3 "$GITHUB_WORKSPACE/$f" | tail -n 300 > "$f.errors.txt" || true
             fi
           done
           echo "run=${{ github.run_id }} status=${{ job.status }} sha=${{ github.sha }}" > STATUS.txt
