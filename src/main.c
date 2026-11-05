@@ -39,6 +39,7 @@
 #include "engine/wasm.h"
 #include "port/Game.h"
 #include "port/Engine.h"
+#include "port/Netplay.h"
 #include "engine/Matrix.h"
 #include "engine/TrackBrowser.h"
 
@@ -389,12 +390,54 @@ void update_controller(s32 index) {
     controller->stickDirection = stick;
 }
 
+/**
+ * Wi-Fi multiplayer (see port/Netplay.h). When a session is running, the controller state that
+ * this phone read is sent to the others and every phone receives the identical set of inputs for
+ * this frame, so all copies of the game stay in step.
+ */
+static void netplay_exchange_inputs(void) {
+    static int sTried = 0;
+    if (!sTried) {
+        sTried = 1;
+        Netplay_Start(NULL);
+    }
+    if (!Netplay_Active()) {
+        return;
+    }
+
+    NetplayInput local;
+    NetplayInput all[NETPLAY_MAX_PLAYERS];
+    s32 i;
+    s32 players = Netplay_PlayerCount();
+
+    local.button = gControllerPads[0].button;
+    local.stick_x = gControllerPads[0].stick_x;
+    local.stick_y = gControllerPads[0].stick_y;
+    local.right_stick_x = gControllerPads[0].right_stick_x;
+    local.right_stick_y = gControllerPads[0].right_stick_y;
+
+    // Cheap fingerprint of the game state, used only to detect the phones drifting apart.
+    uint32_t hash = ((uint32_t) gRandomSeed16 << 16) ^ (uint32_t) gTickCounter ^ ((uint32_t) gGamestate << 8);
+
+    if (!Netplay_Frame(&local, hash, all)) {
+        return; // session ended: carry on with local input
+    }
+    for (i = 0; i < 4; i++) {
+        gControllerPads[i].button = all[i].button;
+        gControllerPads[i].stick_x = all[i].stick_x;
+        gControllerPads[i].stick_y = all[i].stick_y;
+        gControllerPads[i].right_stick_x = all[i].right_stick_x;
+        gControllerPads[i].right_stick_y = all[i].right_stick_y;
+    }
+}
+
 void read_controllers(void) {
     // OSMesg msg;
 
     osContStartReadData(&gSIEventMesgQueue);
     // osRecvMesg(&gSIEventMesgQueue, &msg, OS_MESG_BLOCK);
     osContGetReadData(gControllerPads);
+    netplay_exchange_inputs();
     update_controller(0);
     update_controller(1);
     update_controller(2);
