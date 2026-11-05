@@ -74,6 +74,30 @@ public class TouchControlsView extends View {
     private final float density;
     private boolean hidden;
 
+    // Analog stick: implemented natively (src/port/AndroidTouchStick.cpp) as a virtual SDL
+    // gamepad. If it is not available (yet), the stick falls back to the 4 arrow keys.
+    private static native boolean nativeStick(float x, float y);
+
+    private int attachTries = 0;
+    private final Runnable attachTask = new Runnable() {
+        @Override
+        public void run() {
+            // The virtual pad can only be created after the game initialised SDL's joystick
+            // system, a few seconds after launch, so keep trying quietly until it works.
+            if (!sendAnalog(0f, 0f) && attachTries++ < 120) {
+                postDelayed(this, 1000);
+            }
+        }
+    };
+
+    private boolean sendAnalog(float x, float y) {
+        try {
+            return nativeStick(x, y);
+        } catch (Throwable t) { // UnsatisfiedLinkError etc.
+            return false;
+        }
+    }
+
     public TouchControlsView(Context context) {
         super(context);
         density = context.getResources().getDisplayMetrics().density;
@@ -183,8 +207,14 @@ public class TouchControlsView extends View {
         thumbX = stickCx + dx;
         thumbY = stickCy + dy;
 
-        float thr = stickR * 0.3f;
-        boolean[] want = { dy < -thr, dy > thr, dx < -thr, dx > thr };
+        boolean[] want;
+        if (sendAnalog(dx / stickR, dy / stickR)) {
+            // Analog works: make sure no arrow key is left pressed from the fallback mode.
+            want = new boolean[] { false, false, false, false };
+        } else {
+            float thr = stickR * 0.3f;
+            want = new boolean[] { dy < -thr, dy > thr, dx < -thr, dx > thr };
+        }
         for (int i = 0; i < 4; i++) {
             if (want[i] != stickDown[i]) {
                 stickDown[i] = want[i];
@@ -201,6 +231,7 @@ public class TouchControlsView extends View {
         stickPointer = -1;
         thumbX = stickCx;
         thumbY = stickCy;
+        sendAnalog(0f, 0f);
         for (int i = 0; i < 4; i++) {
             if (stickDown[i]) {
                 stickDown[i] = false;
@@ -284,7 +315,15 @@ public class TouchControlsView extends View {
     }
 
     @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        attachTries = 0;
+        post(attachTask);
+    }
+
+    @Override
     protected void onDetachedFromWindow() {
+        removeCallbacks(attachTask);
         releaseAll();
         super.onDetachedFromWindow();
     }
