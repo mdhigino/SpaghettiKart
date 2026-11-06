@@ -622,9 +622,36 @@ void func_80041D34(void) {
     }
 }
 
+// Wi-Fi play: while one player's screen is drawn full-screen, the HUD (laid out for that player's
+// quadrant/half) is stretched to fill the whole display through this alternate ortho matrix.
+static Mtx sNetplayOrtho;
+static s32 sNetplayOrthoActive = 0;
+
+/**
+ * x0,y0,x1,y1: the rectangle (in 320x240 screen coordinates) that this player's HUD was laid out for.
+ */
+void netplay_hud_rect_begin(f32 x0, f32 y0, f32 x1, f32 y1) {
+    // Size of the coordinate space the game's own HUD ortho uses in the current screen mode.
+    f32 baseW = 320.0f;
+    f32 baseH = 240.0f;
+    if (gActiveScreenMode == SCREEN_MODE_2P_SPLITSCREEN_VERTICAL) {
+        baseW = 160.0f;
+        baseH = 120.0f;
+    } else if (gActiveScreenMode == SCREEN_MODE_2P_SPLITSCREEN_HORIZONTAL && D_801658FE == 0) {
+        baseH = 120.0f;
+    }
+    guOrtho(&sNetplayOrtho, x0 * baseW / 320.0f, x1 * baseW / 320.0f, y1 * baseH / 240.0f, y0 * baseH / 240.0f,
+            -1.0f, 1.0f, 1.0f);
+    sNetplayOrthoActive = 1;
+}
+
+void netplay_hud_rect_end(void) {
+    sNetplayOrthoActive = 0;
+}
+
 void set_matrix_hud_screen(void) {
     gDPSetTexturePersp(gDisplayListHead++, G_TP_PERSP);
-    gSPMatrix(gDisplayListHead++, GetOrthoMatrix(),
+    gSPMatrix(gDisplayListHead++, sNetplayOrthoActive ? &sNetplayOrtho : GetOrthoMatrix(),
               G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 }
 

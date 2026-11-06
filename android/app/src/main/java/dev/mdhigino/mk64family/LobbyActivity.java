@@ -16,6 +16,7 @@ import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -31,6 +32,7 @@ public class LobbyActivity extends Activity {
     private int players = 2;
     private TextView playersLabel;
     private EditText ipField;
+    private CheckBox fullScreen;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -44,6 +46,12 @@ public class LobbyActivity extends Activity {
 
         root.addView(text("MK64 Família", 26, true));
         root.addView(text("Todos os celulares na mesma rede Wi-Fi.", 14, false));
+
+        fullScreen = new CheckBox(this);
+        fullScreen.setText("Tela cheia para cada jogador");
+        fullScreen.setTextColor(Color.WHITE);
+        fullScreen.setChecked(prefs.getBoolean("fullscreen", true));
+        root.addView(fullScreen);
 
         root.addView(button("Jogar sozinho", v -> launch("off", 0, "")));
 
@@ -105,6 +113,9 @@ public class LobbyActivity extends Activity {
                     w.write("host=" + host + "\n");
                     w.write("port=" + PORT + "\n");
                     w.write("delay=3\n");
+                    boolean fs = fullScreen != null && fullScreen.isChecked();
+                    getSharedPreferences("lobby", MODE_PRIVATE).edit().putBoolean("fullscreen", fs).apply();
+                    w.write("fullscreen=" + (fs ? 1 : 0) + "\n");
                 }
             }
         } catch (Throwable t) {

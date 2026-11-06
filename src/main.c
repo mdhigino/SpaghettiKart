@@ -390,6 +390,79 @@ void update_controller(s32 index) {
     controller->stickDirection = stick;
 }
 
+void netplay_hud_rect_begin(f32 x0, f32 y0, f32 x1, f32 y1);
+void netplay_hud_rect_end(void);
+extern f32 gScreenAspect;
+
+/**
+ * Wi-Fi multiplayer, "own full screen": every phone simulates the whole race (so all copies stay
+ * identical) but only DRAWS its own player's view, stretched over the entire display instead of
+ * one quarter/half of it. Returns 1 if it drew something, 0 to fall back to the normal split screen.
+ */
+static int netplay_render_own_screen(void) {
+    if (!Netplay_Active() || !Netplay_FullScreen()) {
+        return 0;
+    }
+    s32 me = Netplay_LocalIndex();
+    if (me < 0 || me >= gPlayerCountSelection1 || me > 3) {
+        return 0;
+    }
+
+    ScreenContext* screens[4] = { gScreenOneCtx, gScreenTwoCtx, gScreenThreeCtx, gScreenFourCtx };
+    ScreenContext* screen = screens[me];
+    s32 mode;
+    s32 id;
+    // The area of the 320x240 display that the game gives this player when the screen is split.
+    f32 x0, y0, x1, y1;
+
+    switch (gActiveScreenMode) {
+        case SCREEN_MODE_2P_SPLITSCREEN_HORIZONTAL:
+            mode = (me == 0) ? RENDER_SCREEN_MODE_2P_HORIZONTAL_PLAYER_ONE : RENDER_SCREEN_MODE_2P_HORIZONTAL_PLAYER_TWO;
+            id = (me == 0) ? 3 : 4;
+            x0 = 0; x1 = 320;
+            y0 = (me == 0) ? 0 : 120; y1 = y0 + 120;
+            break;
+        case SCREEN_MODE_2P_SPLITSCREEN_VERTICAL:
+            mode = (me == 0) ? RENDER_SCREEN_MODE_2P_VERTICAL_PLAYER_ONE : RENDER_SCREEN_MODE_2P_VERTICAL_PLAYER_TWO;
+            id = (me == 0) ? 1 : 2;
+            y0 = 0; y1 = 240;
+            x0 = (me == 0) ? 0 : 160; x1 = x0 + 160;
+            break;
+        case SCREEN_MODE_3P_4P_SPLITSCREEN: {
+            static const s32 modes[4] = { RENDER_SCREEN_MODE_3P_4P_PLAYER_ONE, RENDER_SCREEN_MODE_3P_4P_PLAYER_TWO,
+                                          RENDER_SCREEN_MODE_3P_4P_PLAYER_THREE, RENDER_SCREEN_MODE_3P_4P_PLAYER_FOUR };
+            mode = modes[me];
+            id = 8 + me;
+            x0 = (me & 1) ? 160 : 0; x1 = x0 + 160;
+            y0 = (me & 2) ? 120 : 0; y1 = y0 + 120;
+            break;
+        }
+        default:
+            return 0;
+    }
+
+    s16 sw = screen->screenWidth, sh = screen->screenHeight, sx = screen->screenStartX, sy = screen->screenStartY;
+    f32 aspect = gScreenAspect;
+
+    // Take the whole display, 4:3 like the original.
+    screen->screenWidth = SCREEN_WIDTH;
+    screen->screenHeight = SCREEN_HEIGHT;
+    screen->screenStartX = SCREEN_WIDTH / 2;
+    screen->screenStartY = SCREEN_HEIGHT / 2;
+    gScreenAspect = 1.33333334f;
+    netplay_hud_rect_begin(x0, y0, x1, y1);
+
+    render_screens(screen, mode, id, me);
+
+    netplay_hud_rect_end();
+    gScreenAspect = aspect;
+    screen->screenWidth = sw;
+    screen->screenHeight = sh;
+    screen->screenStartX = sx;
+    screen->screenStartY = sy;
+    return 1;
+}
+
 /**
  * Wi-Fi multiplayer (see port/Netplay.h). When a session is running, the controller state that
  * this phone read is sent to the others and every phone receives the identical set of inputs for
@@ -787,7 +860,9 @@ void race_logic_loop(void) {
         select_framebuffer();
     }
 
-    switch (gActiveScreenMode) {
+    if (netplay_render_own_screen()) {
+        // drawn full screen for this phone's player
+    } else switch (gActiveScreenMode) {
         case SCREEN_MODE_1P:
             render_screens(gScreenOneCtx, RENDER_SCREEN_MODE_1P_PLAYER_ONE, 0, 0);
             break;

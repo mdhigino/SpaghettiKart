@@ -58,6 +58,7 @@ struct HashSlot {
 bool sActive = false;
 bool sHost = false;
 bool sDesynced = false;
+bool sFullScreen = true;
 int sSock = -1;
 int sPort = 27015;
 int sPlayers = 2;
@@ -379,6 +380,7 @@ struct Config {
     int players = 2;
     int port = 27015;
     int delay = 3;
+    bool fullscreen = true;
     char hostIp[64] = {0};
 };
 
@@ -403,6 +405,8 @@ bool ReadConfig(const char* path, Config& c) {
             c.players = atoi(val);
         } else if (!strcmp(line, "port")) {
             c.port = atoi(val);
+        } else if (!strcmp(line, "fullscreen")) {
+            c.fullscreen = atoi(val) != 0;
         } else if (!strcmp(line, "delay")) {
             c.delay = atoi(val);
         } else if (!strcmp(line, "host")) {
@@ -443,6 +447,7 @@ int Netplay_Start(const char* cfgPath) {
     if (c.delay > 10) c.delay = 10;
 
     sHost = c.host;
+    sFullScreen = c.fullscreen;
     sPort = c.port;
     sPlayers = c.players;
     sDelay = c.delay;
@@ -570,6 +575,7 @@ int Netplay_Active(void) { return sActive ? 1 : 0; }
 int Netplay_LocalIndex(void) { return sActive ? sIndex : -1; }
 int Netplay_PlayerCount(void) { return sActive ? sPlayers : 0; }
 int Netplay_Desynced(void) { return sDesynced ? 1 : 0; }
+int Netplay_FullScreen(void) { return sFullScreen ? 1 : 0; }
 
 int Netplay_Frame(const NetplayInput* local, uint32_t stateHash, NetplayInput* out) {
     if (!sActive) {
@@ -641,6 +647,7 @@ int Netplay_LocalIndex(void) { return -1; }
 int Netplay_PlayerCount(void) { return 0; }
 int Netplay_Frame(const NetplayInput*, uint32_t, NetplayInput*) { return 0; }
 int Netplay_Desynced(void) { return 0; }
+int Netplay_FullScreen(void) { return 0; }
 void Netplay_Stop(void) {}
 }
 

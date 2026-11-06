@@ -12,6 +12,7 @@
 //   host=192.168.0.10   (client only: the host's address)
 //   port=27015
 //   delay=3             (input delay in frames, host decides)
+//   fullscreen=1       (each phone draws only its own player, full screen)
 // No file (or mode=off) means normal single-device play.
 #pragma once
 
@@ -48,6 +49,9 @@ int Netplay_PlayerCount(void);
 // Blocks (politely) until every player's input for this frame is known.
 // Returns 1 on success, 0 if the session was aborted (caller should fall back to local input).
 int Netplay_Frame(const NetplayInput* local, uint32_t stateHash, NetplayInput* out);
+
+// 1 when each phone should draw only its own player, full screen (config key fullscreen=1, default).
+int Netplay_FullScreen(void);
 
 // 1 once a state mismatch between phones has been detected.
 int Netplay_Desynced(void);
