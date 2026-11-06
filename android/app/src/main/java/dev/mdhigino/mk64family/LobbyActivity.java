@@ -8,6 +8,7 @@ import java.net.NetworkInterface;
 import java.util.Collections;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -33,6 +34,8 @@ public class LobbyActivity extends Activity {
     private TextView playersLabel;
     private EditText ipField;
     private CheckBox fullScreen;
+    private EditText relayField;
+    private EditText roomField;
 
     @Override
     protected void onCreate(Bundle b) {
@@ -90,6 +93,53 @@ public class LobbyActivity extends Activity {
             launch("client", 0, ip);
         }));
 
+        root.addView(text("\nJOGAR PELA INTERNET (servidor próprio)", 16, true));
+        root.addView(text("Endereço do servidor, com porta (ex.: 203.0.113.5:27016):", 14, false));
+        relayField = new EditText(this);
+        relayField.setHint("endereço:porta");
+        relayField.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+        relayField.setTextColor(Color.WHITE);
+        relayField.setHintTextColor(Color.GRAY);
+        relayField.setText(prefs.getString("relay", ""));
+        root.addView(relayField);
+        root.addView(button("Criar sala online (usa a quantidade de jogadores acima)", v -> {
+            String relay = relayField.getText().toString().trim();
+            if (!relay.matches(".+:\\d{2,5}")) {
+                relayField.setError("Use endereço:porta");
+                return;
+            }
+            prefs.edit().putString("relay", relay).putInt("players", players).apply();
+            final int room = 100000 + new java.util.Random().nextInt(900000);
+            new AlertDialog.Builder(this)
+                    .setTitle("Código da sala: " + room)
+                    .setMessage("Passe este código para os outros jogadores. Eles tocam em \"Entrar com código\". "
+                            + "Depois toque em Iniciar: a tela fica preta até todos entrarem.")
+                    .setCancelable(false)
+                    .setPositiveButton("Iniciar", (d, w) -> launchOnline("host", players, relay, room))
+                    .setNegativeButton("Cancelar", null)
+                    .show();
+        }));
+        roomField = new EditText(this);
+        roomField.setHint("código da sala (6 números)");
+        roomField.setInputType(InputType.TYPE_CLASS_NUMBER);
+        roomField.setTextColor(Color.WHITE);
+        roomField.setHintTextColor(Color.GRAY);
+        root.addView(roomField);
+        root.addView(button("Entrar com código", v -> {
+            String relay = relayField.getText().toString().trim();
+            String code = roomField.getText().toString().trim();
+            if (!relay.matches(".+:\\d{2,5}")) {
+                relayField.setError("Use endereço:porta");
+                return;
+            }
+            if (!code.matches("\\d{6}")) {
+                roomField.setError("São 6 números");
+                return;
+            }
+            prefs.edit().putString("relay", relay).apply();
+            launchOnline("client", 0, relay, Integer.parseInt(code));
+        }));
+
         root.addView(text("\nDica: o anfitrião deve tocar em \"Criar sala\" PRIMEIRO. "
                 + "Depois os outros entram. O jogo começa quando todos entrarem.", 13, false));
 
@@ -104,6 +154,15 @@ public class LobbyActivity extends Activity {
     }
 
     private void launch(String mode, int n, String host) {
+        launchWith(mode, n, host, "", 0, 3);
+    }
+
+    // Internet play goes through the relay server; the input delay is larger to absorb the latency.
+    private void launchOnline(String mode, int n, String relay, int room) {
+        launchWith(mode, n, "", relay, room, 6);
+    }
+
+    private void launchWith(String mode, int n, String host, String relay, int room, int delay) {
         try {
             File dir = getExternalFilesDir(null);
             if (dir != null) {
@@ -112,7 +171,11 @@ public class LobbyActivity extends Activity {
                     w.write("players=" + n + "\n");
                     w.write("host=" + host + "\n");
                     w.write("port=" + PORT + "\n");
-                    w.write("delay=3\n");
+                    w.write("delay=" + delay + "\n");
+                    if (!relay.isEmpty()) {
+                        w.write("relay=" + relay + "\n");
+                        w.write("room=" + room + "\n");
+                    }
                     boolean fs = fullScreen != null && fullScreen.isChecked();
                     getSharedPreferences("lobby", MODE_PRIVATE).edit().putBoolean("fullscreen", fs).apply();
                     w.write("fullscreen=" + (fs ? 1 : 0) + "\n");

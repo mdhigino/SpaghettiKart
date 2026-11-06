@@ -14,6 +14,7 @@
 #ifdef NETPLAY_POSIX
 
 #include <arpa/inet.h>
+#include <netdb.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <netinet/in.h>
@@ -166,15 +167,119 @@ bool IsComplete(int64_t frame) {
     return s.tag == frame && s.have == sFullMask;
 }
 
-void SendTo(const Writer& w, const sockaddr_in& to) {
+// ---- optional internet relay (a tiny UDP server on a VPS, see tools/relay/) ----
+// Phones behind routers / mobile networks cannot reach each other directly, so in relay mode every
+// packet is wrapped in a small envelope and passed through the relay, which forwards it by room code.
+// The rest of the code does not notice: peers are represented by made-up addresses (10.255.0.<id>).
+constexpr uint32_t kRelayMagic = 0x4D4B524C; // "MKRL"
+enum : uint8_t { kRlHost = 1, kRlUp = 2, kRlDown = 3, kRlFrom = 4, kRlFromHost = 5 };
+constexpr size_t kRelayHeader = 10;
+
+bool sRelay = false;
+int64_t sLastRelayReg = 0;
+uint32_t sRoom = 0;
+sockaddr_in sRelayAddr;
+
+sockaddr_in FakeAddr(int id) {
+    sockaddr_in a;
+    memset(&a, 0, sizeof(a));
+    a.sin_family = AF_INET;
+    a.sin_addr.s_addr = htonl(0x0AFF0000u | static_cast<uint32_t>(id));
+    a.sin_port = htons(1);
+    return a;
+}
+
+void RawSend(const uint8_t* data, size_t n, const sockaddr_in& to) {
 #ifdef NETPLAY_TEST
-    // Test builds can simulate a lossy Wi-Fi: NETPLAY_LOSS=30 drops 30% of outgoing packets.
+    // Test builds can simulate a lossy network: NETPLAY_LOSS=30 drops 30% of outgoing packets.
     static int loss = getenv("NETPLAY_LOSS") ? atoi(getenv("NETPLAY_LOSS")) : 0;
     if (loss > 0 && (rand() % 100) < loss) {
         return;
     }
 #endif
-    sendto(sSock, w.buf, w.n, 0, reinterpret_cast<const sockaddr*>(&to), sizeof(to));
+    sendto(sSock, data, n, 0, reinterpret_cast<const sockaddr*>(&to), sizeof(to));
+}
+
+void RelayEnvelope(uint8_t* out, uint8_t type) {
+    out[0] = kRelayMagic & 0xFF;
+    out[1] = (kRelayMagic >> 8) & 0xFF;
+    out[2] = (kRelayMagic >> 16) & 0xFF;
+    out[3] = (kRelayMagic >> 24) & 0xFF;
+    out[4] = 1;
+    out[5] = type;
+    out[6] = sRoom & 0xFF;
+    out[7] = (sRoom >> 8) & 0xFF;
+    out[8] = (sRoom >> 16) & 0xFF;
+    out[9] = (sRoom >> 24) & 0xFF;
+}
+
+void RelayRegisterHost() {
+    uint8_t pkt[kRelayHeader];
+    RelayEnvelope(pkt, kRlHost);
+    RawSend(pkt, sizeof(pkt), sRelayAddr);
+}
+
+void SendTo(const Writer& w, const sockaddr_in& to) {
+    if (!sRelay) {
+        RawSend(w.buf, w.n, to);
+        return;
+    }
+    uint8_t pkt[1600];
+    if (w.n + kRelayHeader + 1 > sizeof(pkt)) {
+        return;
+    }
+    size_t n = kRelayHeader;
+    if (sHost) {
+        RelayEnvelope(pkt, kRlDown);
+        pkt[n++] = static_cast<uint8_t>(ntohl(to.sin_addr.s_addr) & 0xFF); // which client
+    } else {
+        RelayEnvelope(pkt, kRlUp);
+    }
+    memcpy(pkt + n, w.buf, w.n);
+    RawSend(pkt, n + w.n, sRelayAddr);
+}
+
+// Receives one game packet. In relay mode the envelope is removed and `from` is the made-up address.
+// Returns the payload length, 0 if the datagram was not a game packet, -1 if nothing was waiting.
+ssize_t RecvOne(uint8_t* buf, size_t cap, sockaddr_in* from, int flags) {
+    uint8_t raw[1700];
+    sockaddr_in src;
+    socklen_t slen = sizeof(src);
+    ssize_t n = recvfrom(sSock, raw, sizeof(raw), flags, reinterpret_cast<sockaddr*>(&src), &slen);
+    if (n < 0) {
+        return -1;
+    }
+    if (!sRelay) {
+        if (static_cast<size_t>(n) > cap) {
+            return 0;
+        }
+        memcpy(buf, raw, n);
+        *from = src;
+        return n;
+    }
+    if (src.sin_addr.s_addr != sRelayAddr.sin_addr.s_addr || src.sin_port != sRelayAddr.sin_port ||
+        n < static_cast<ssize_t>(kRelayHeader + 1)) {
+        return 0;
+    }
+    uint32_t magic = raw[0] | (raw[1] << 8) | (raw[2] << 16) | (static_cast<uint32_t>(raw[3]) << 24);
+    if (magic != kRelayMagic) {
+        return 0;
+    }
+    size_t off = kRelayHeader;
+    uint8_t type = raw[5];
+    if (type == kRlFrom && sHost) {
+        *from = FakeAddr(raw[off++]);
+    } else if (type == kRlFromHost && !sHost) {
+        *from = FakeAddr(0);
+    } else {
+        return 0;
+    }
+    size_t len = static_cast<size_t>(n) - off;
+    if (len > cap) {
+        return 0;
+    }
+    memcpy(buf, raw + off, len);
+    return static_cast<ssize_t>(len);
 }
 
 bool SameAddr(const sockaddr_in& a, const sockaddr_in& b) {
@@ -363,12 +468,13 @@ void Pump(int waitMs) {
     while (ret > 0) {
         uint8_t buf[1600];
         sockaddr_in from;
-        socklen_t flen = sizeof(from);
-        ssize_t n = recvfrom(sSock, buf, sizeof(buf), MSG_DONTWAIT, reinterpret_cast<sockaddr*>(&from), &flen);
-        if (n <= 0) {
+        ssize_t n = RecvOne(buf, sizeof(buf), &from, MSG_DONTWAIT);
+        if (n < 0) {
             break;
         }
-        HandlePacket(buf, static_cast<size_t>(n), from);
+        if (n > 0) {
+            HandlePacket(buf, static_cast<size_t>(n), from);
+        }
         ret = poll(&pfd, 1, 0);
     }
 }
@@ -381,6 +487,8 @@ struct Config {
     int port = 27015;
     int delay = 3;
     bool fullscreen = true;
+    char relay[96] = {0};
+    uint32_t room = 0;
     char hostIp[64] = {0};
 };
 
@@ -405,6 +513,10 @@ bool ReadConfig(const char* path, Config& c) {
             c.players = atoi(val);
         } else if (!strcmp(line, "port")) {
             c.port = atoi(val);
+        } else if (!strcmp(line, "relay")) {
+            strncpy(c.relay, val, sizeof(c.relay) - 1);
+        } else if (!strcmp(line, "room")) {
+            c.room = static_cast<uint32_t>(strtoul(val, nullptr, 10));
         } else if (!strcmp(line, "fullscreen")) {
             c.fullscreen = atoi(val) != 0;
         } else if (!strcmp(line, "delay")) {
@@ -447,6 +559,36 @@ int Netplay_Start(const char* cfgPath) {
     if (c.delay > 10) c.delay = 10;
 
     sHost = c.host;
+    sRelay = false;
+    if (c.relay[0]) {
+        // "address:port" of the relay server; the address may be a name.
+        char hostPart[96];
+        strncpy(hostPart, c.relay, sizeof(hostPart) - 1);
+        hostPart[sizeof(hostPart) - 1] = 0;
+        int relayPort = 27016;
+        char* colon = strrchr(hostPart, ':');
+        if (colon) {
+            *colon = 0;
+            relayPort = atoi(colon + 1);
+        }
+        addrinfo hints;
+        memset(&hints, 0, sizeof(hints));
+        hints.ai_family = AF_INET;
+        hints.ai_socktype = SOCK_DGRAM;
+        addrinfo* res = nullptr;
+        if (getaddrinfo(hostPart, nullptr, &hints, &res) != 0 || !res) {
+            Log("relay: cannot resolve '%s'", hostPart);
+            return 0;
+        }
+        memcpy(&sRelayAddr, res->ai_addr, sizeof(sRelayAddr));
+        sRelayAddr.sin_port = htons(relayPort);
+        freeaddrinfo(res);
+        sRoom = c.room;
+        sRelay = (sRoom != 0);
+        if (sRelay) {
+            Log("online mode: relay %s port %d, room %u", hostPart, relayPort, sRoom);
+        }
+    }
     sFullScreen = c.fullscreen;
     sPort = c.port;
     sPlayers = c.players;
@@ -489,7 +631,12 @@ int Netplay_Start(const char* cfgPath) {
     if (sHost) {
         sIndex = 0;
         Log("host: waiting for %d player(s) on UDP port %d", sPlayers - 1, sPort);
+        int64_t lastReg = 0;
         for (;;) {
+            if (sRelay && NowMs() - lastReg >= 1000) {
+                RelayRegisterHost();
+                lastReg = NowMs();
+            }
             Pump(50);
             int joined = 0;
             for (int i = 1; i < sPlayers; i++) {
@@ -511,12 +658,16 @@ int Netplay_Start(const char* cfgPath) {
         }
     } else {
         memset(&sHostAddr, 0, sizeof(sHostAddr));
-        sHostAddr.sin_family = AF_INET;
-        sHostAddr.sin_port = htons(sPort);
-        if (inet_pton(AF_INET, c.hostIp, &sHostAddr.sin_addr) != 1) {
-            Log("client: invalid host address '%s'", c.hostIp);
-            CloseSocket();
-            return 0;
+        if (sRelay) {
+            sHostAddr = FakeAddr(0);
+        } else {
+            sHostAddr.sin_family = AF_INET;
+            sHostAddr.sin_port = htons(sPort);
+            if (inet_pton(AF_INET, c.hostIp, &sHostAddr.sin_addr) != 1) {
+                Log("client: invalid host address '%s'", c.hostIp);
+                CloseSocket();
+                return 0;
+            }
         }
         Log("client: looking for host %s:%d", c.hostIp, sPort);
         bool started = false;
@@ -535,8 +686,7 @@ int Netplay_Start(const char* cfgPath) {
             if (poll(&pfd, 1, 50) > 0) {
                 uint8_t buf[256];
                 sockaddr_in from;
-                socklen_t flen = sizeof(from);
-                ssize_t n = recvfrom(sSock, buf, sizeof(buf), 0, reinterpret_cast<sockaddr*>(&from), &flen);
+                ssize_t n = RecvOne(buf, sizeof(buf), &from, 0);
                 if (n >= static_cast<ssize_t>(kHeaderBytes) && SameAddr(from, sHostAddr)) {
                     Reader r{buf, static_cast<size_t>(n)};
                     if (r.u32() == kMagic && r.u8() == kVersion && r.u8() == kStart) {
@@ -599,6 +749,10 @@ int Netplay_Frame(const NetplayInput* local, uint32_t stateHash, NetplayInput* o
     Pump(0);
     while (!IsComplete(f)) {
         int64_t now = NowMs();
+        if (sRelay && sHost && now - sLastRelayReg >= 1000) {
+            RelayRegisterHost();
+            sLastRelayReg = now;
+        }
         if (first || now - lastSend >= kResendMs) {
             if (sHost) {
                 HostBroadcast(true);
