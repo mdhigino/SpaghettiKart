@@ -75,7 +75,25 @@ Vtx D_802B8A10[] = {
     { { { 0, 120, -1 }, 0, { 0, 0 }, { 0x00, 0xDC, 0x00, 0xFF } } },
 };
 
+// Wi-Fi play, "own full screen": while set, every viewport/scissor/z-clear below covers the whole
+// 320x240 display instead of this player's slice. Uses its own Vp so the ScreenContext is never touched.
+s32 gNetplayFullViewport = 0;
+static Vp sNetplayViewport;
+
 void race_set_viewport(ScreenContext* arg0) {
+    if (gNetplayFullViewport) {
+        sNetplayViewport.vp.vscale[0] = SCREEN_WIDTH * 2;
+        sNetplayViewport.vp.vscale[1] = SCREEN_HEIGHT * 2;
+        sNetplayViewport.vp.vscale[2] = 511;
+        sNetplayViewport.vp.vscale[3] = 0;
+        sNetplayViewport.vp.vtrans[0] = SCREEN_WIDTH * 2;
+        sNetplayViewport.vp.vtrans[1] = SCREEN_HEIGHT * 2;
+        sNetplayViewport.vp.vtrans[2] = 511;
+        sNetplayViewport.vp.vtrans[3] = 0;
+        gSPViewport(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(&sNetplayViewport));
+        gDPSetScissor(gDisplayListHead++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        return;
+    }
     s32 ulx;
     s32 uly;
     s32 lrx;
@@ -161,6 +179,13 @@ void func_802A39E0(ScreenContext* arg0) {
     s32 uly = arg0->screenStartY - (arg0->screenHeight / 2);
     s32 lrx = arg0->screenStartX + (arg0->screenWidth / 2);
     s32 lry = arg0->screenStartY + (arg0->screenHeight / 2);
+
+    if (gNetplayFullViewport) {
+        ulx = 0;
+        uly = 0;
+        lrx = SCREEN_WIDTH;
+        lry = SCREEN_HEIGHT;
+    }
 
     if (ulx < 0) {
         ulx = 0;

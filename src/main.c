@@ -393,6 +393,7 @@ void update_controller(s32 index) {
 void netplay_hud_rect_begin(f32 x0, f32 y0, f32 x1, f32 y1);
 void netplay_hud_rect_end(void);
 extern f32 gScreenAspect;
+extern s32 gNetplayFullViewport;
 
 /**
  * Wi-Fi multiplayer, "own full screen": every phone simulates the whole race (so all copies stay
@@ -449,14 +450,10 @@ static int netplay_render_own_screen(void) {
             return 0;
     }
 
-    s16 sw = screen->screenWidth, sh = screen->screenHeight, sx = screen->screenStartX, sy = screen->screenStartY;
     f32 aspect = gScreenAspect;
 
     // Take the whole display, 4:3 like the original.
-    screen->screenWidth = SCREEN_WIDTH;
-    screen->screenHeight = SCREEN_HEIGHT;
-    screen->screenStartX = SCREEN_WIDTH / 2;
-    screen->screenStartY = SCREEN_HEIGHT / 2;
+    gNetplayFullViewport = 1;
     gScreenAspect = 1.33333334f;
     netplay_hud_rect_begin(x0, y0, x1, y1);
 
@@ -464,10 +461,7 @@ static int netplay_render_own_screen(void) {
 
     netplay_hud_rect_end();
     gScreenAspect = aspect;
-    screen->screenWidth = sw;
-    screen->screenHeight = sh;
-    screen->screenStartX = sx;
-    screen->screenStartY = sy;
+    gNetplayFullViewport = 0;
     return 1;
 }
 
