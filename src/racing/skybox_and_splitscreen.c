@@ -78,6 +78,8 @@ Vtx D_802B8A10[] = {
 // Wi-Fi play, "own full screen": while set, every viewport/scissor/z-clear below covers the whole
 // 320x240 display instead of this player's slice. Uses its own Vp so the ScreenContext is never touched.
 s32 gNetplayFullViewport = 0;
+s32 gNetplayLocalPlayer = -1;                     // whose screen this phone draws (-1: normal split screen)
+s32 gNetplayClip[4] = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT }; // that player's slice of the display (UI clipping)
 static Vp sNetplayViewport;
 
 void race_set_viewport(ScreenContext* arg0) {

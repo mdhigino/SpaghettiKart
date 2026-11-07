@@ -626,6 +626,8 @@ void func_80041D34(void) {
 // quadrant/half) is stretched to fill the whole display through this alternate ortho matrix.
 static Mtx sNetplayOrtho;
 static s32 sNetplayOrthoActive = 0;
+extern s32 gNetplayClip[4];
+extern Mtx D_80183D60;
 
 /**
  * x0,y0,x1,y1: the rectangle (in 320x240 screen coordinates) that this player's HUD was laid out for.
@@ -640,9 +642,24 @@ void netplay_hud_rect_begin(f32 x0, f32 y0, f32 x1, f32 y1) {
     } else if (gActiveScreenMode == SCREEN_MODE_2P_SPLITSCREEN_HORIZONTAL && D_801658FE == 0) {
         baseH = 120.0f;
     }
-    guOrtho(&sNetplayOrtho, x0 * baseW / 320.0f, x1 * baseW / 320.0f, y1 * baseH / 240.0f, y0 * baseH / 240.0f,
-            -1.0f, 1.0f, 1.0f);
-    sNetplayOrthoActive = 1;
+    gNetplayClip[0] = (s32) x0;
+    gNetplayClip[1] = (s32) y0;
+    gNetplayClip[2] = (s32) x1;
+    gNetplayClip[3] = (s32) y1;
+    // Only a 4:3 slice (the 3-4 player quarters) can be enlarged without distorting the HUD. The wide/tall
+    // halves of a 2-player screen keep the normal HUD layout and the other player's part is clipped away.
+    if ((x1 - x0) * 3.0f == (y1 - y0) * 4.0f) {
+        guOrtho(&sNetplayOrtho, x0 * baseW / 320.0f, x1 * baseW / 320.0f, y1 * baseH / 240.0f, y0 * baseH / 240.0f,
+                -1.0f, 1.0f, 1.0f);
+        sNetplayOrthoActive = 1;
+    } else {
+        sNetplayOrthoActive = 0;
+    }
+}
+
+// The "UI code" HUD (minimap, rank, ...) uses its own fixed full-screen ortho; same idea.
+Mtx* netplay_ui_ortho(void) {
+    return sNetplayOrthoActive ? &sNetplayOrtho : &D_80183D60;
 }
 
 void netplay_hud_rect_end(void) {

@@ -403,8 +403,27 @@ s32 D_800E480C[] = {
 };
 
 // UI Code?
+extern s32 gNetplayFullViewport;
+extern s32 gNetplayLocalPlayer;
+extern s32 gNetplayClip[4];
+Mtx* netplay_ui_ortho(void);
+
 void func_80057C60(void) {
     gSPViewport(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(D_802B8880));
+    if (gNetplayFullViewport) {
+        // Wi-Fi play: only this phone's player's part of the HUD is shown. 3-4 player quarters are
+        // enlarged to the whole display; the halves of a 2-player screen keep their layout and the
+        // other player's half is cut away with the scissor.
+        Mtx* ui = netplay_ui_ortho();
+        if (ui == &D_80183D60) {
+            gDPSetScissor(gDisplayListHead++, G_SC_NON_INTERLACE, gNetplayClip[0], gNetplayClip[1], gNetplayClip[2],
+                          gNetplayClip[3]);
+        } else {
+            gDPSetScissor(gDisplayListHead++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        }
+        gSPMatrix(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(ui), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        return;
+    }
     gDPSetScissor(gDisplayListHead++, G_SC_NON_INTERLACE, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     gSPMatrix(gDisplayListHead++, VIRTUAL_TO_PHYSICAL(&D_80183D60), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
 }
@@ -814,18 +833,19 @@ void func_800591B4(void) {
 
         if (gIsHUDVisible != 0) {
             if (D_801657D8 == 0) {
-                if (D_801657F0 != false) {
+                if (D_801657F0 != false && !gNetplayFullViewport) { // the middle progress bar belongs to the split screen
                     func_800514BC();
                 }
                 if ((!gDemoMode) && (D_801657E8 != false)) {
-                    if (D_80165800[0] != 0) {
+                    if (D_80165800[0] != 0 && (!gNetplayFullViewport || gNetplayLocalPlayer == 0)) {
                         func_8004EE54(0);
                         if (gModeSelection != BATTLE) {
                             set_minimap_finishline_position(0);
                         }
                         func_8004F3E4(0);
                     }
-                    if ((gScreenModeSelection == SCREEN_MODE_2P_SPLITSCREEN_HORIZONTAL) && (D_80165800[1] != 0)) {
+                    if ((gScreenModeSelection == SCREEN_MODE_2P_SPLITSCREEN_HORIZONTAL) && (D_80165800[1] != 0) &&
+                        (!gNetplayFullViewport || gNetplayLocalPlayer == 1)) {
                         func_8004EE54(1);
                         if (gModeSelection != BATTLE) {
                             set_minimap_finishline_position(1);
