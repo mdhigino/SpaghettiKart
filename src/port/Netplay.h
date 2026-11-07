@@ -58,6 +58,9 @@ int Netplay_Desynced(void);
 
 void Netplay_Stop(void);
 
+// Writes a line to the log (logcat on Android).
+void Netplay_Log(const char* fmt, ...);
+
 #ifdef __cplusplus
 }
 #endif

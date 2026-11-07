@@ -400,10 +400,18 @@ extern f32 gScreenAspect;
  * one quarter/half of it. Returns 1 if it drew something, 0 to fall back to the normal split screen.
  */
 static int netplay_render_own_screen(void) {
+    static s32 sLogCount = 0;
     if (!Netplay_Active() || !Netplay_FullScreen()) {
+        if (Netplay_Active() && sLogCount++ % 600 == 0) {
+            Netplay_Log("fullscreen: OFF (active=%d fullscreen=%d)", Netplay_Active(), Netplay_FullScreen());
+        }
         return 0;
     }
     s32 me = Netplay_LocalIndex();
+    if (sLogCount++ % 600 == 0) {
+        Netplay_Log("fullscreen: mode=%d me=%d humans=%d cam1=%d cam2=%d", (int) gActiveScreenMode, (int) me,
+                    (int) gPlayerCountSelection1, gScreenOneCtx->camera != NULL, gScreenTwoCtx->camera != NULL);
+    }
     if (me < 0 || me >= gPlayerCountSelection1 || me > 3) {
         return 0;
     }

@@ -540,6 +540,15 @@ void CloseSocket() {
 
 extern "C" {
 
+void Netplay_Log(const char* fmt, ...) {
+    char buf[256];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+    Log("%s", buf);
+}
+
 int Netplay_Start(const char* cfgPath) {
     if (sActive) {
         return 1;
@@ -796,6 +805,7 @@ void Netplay_Stop(void) {
 
 extern "C" {
 int Netplay_Start(const char*) { return 0; }
+void Netplay_Log(const char*, ...) {}
 int Netplay_Active(void) { return 0; }
 int Netplay_LocalIndex(void) { return -1; }
 int Netplay_PlayerCount(void) { return 0; }
