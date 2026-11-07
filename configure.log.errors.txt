@@ -1,0 +1,188 @@
+36:SDL2 not found. Downloading now...
+37--- Found PkgConfig: /usr/bin/pkg-config (found version "2.5.1")
+38--- Looking for __GLIBC__
+39:-- Looking for __GLIBC__ - not found
+40--- Performing Test CHECK_CPU_ARCHITECTURE_X86
+41--- Performing Test CHECK_CPU_ARCHITECTURE_X86 - Failed
+42--- Performing Test CHECK_CPU_ARCHITECTURE_X64
+--
+77:-- Looking for immintrin.h - not found
+78--- Performing Test HAVE_ALTIVEC_H_HDR
+79--- Performing Test HAVE_ALTIVEC_H_HDR - Failed
+80--- Performing Test CPU_SUPPORTS_ALTIVEC
+--
+165:-- Looking for _strrev - not found
+166--- Looking for _strupr
+167:-- Looking for _strupr - not found
+168--- Looking for _strlwr
+169:-- Looking for _strlwr - not found
+170--- Looking for index
+171:-- Looking for index - not found
+172--- Looking for rindex
+173:-- Looking for rindex - not found
+174--- Looking for strchr
+175--- Looking for strchr - found
+176--- Looking for strrchr
+--
+183:-- Looking for itoa - not found
+184--- Looking for _ltoa
+185:-- Looking for _ltoa - not found
+186--- Looking for _uitoa
+187:-- Looking for _uitoa - not found
+188--- Looking for _ultoa
+189:-- Looking for _ultoa - not found
+190--- Looking for strtol
+191--- Looking for strtol - found
+192--- Looking for strtoul
+--
+195:-- Looking for _i64toa - not found
+196--- Looking for _ui64toa
+197:-- Looking for _ui64toa - not found
+198--- Looking for strtoll
+199--- Looking for strtoll - found
+200--- Looking for strtoull
+--
+211:-- Looking for _stricmp - not found
+212--- Looking for strcasecmp
+213--- Looking for strcasecmp - found
+214--- Looking for _strnicmp
+215:-- Looking for _strnicmp - not found
+216--- Looking for strncasecmp
+217--- Looking for strncasecmp - found
+218--- Looking for strcasestr
+--
+223:-- Looking for _wcsdup - not found
+224--- Looking for wcsdup
+225--- Looking for wcsdup - found
+226--- Looking for wcslcat
+--
+239:-- Looking for _wcsicmp - not found
+240--- Looking for wcsncasecmp
+241--- Looking for wcsncasecmp - found
+242--- Looking for _wcsnicmp
+243:-- Looking for _wcsnicmp - not found
+244--- Looking for sscanf
+245--- Looking for sscanf - found
+246--- Looking for vsscanf
+--
+269:-- Looking for sysctlbyname - not found
+270--- Looking for getauxval
+271--- Looking for getauxval - found
+272--- Looking for elf_aux_info
+273:-- Looking for elf_aux_info - not found
+274--- Looking for poll
+275--- Looking for poll - found
+276--- Looking for memfd_create
+277:-- Looking for memfd_create - not found
+278--- Looking for posix_fallocate
+279--- Looking for posix_fallocate - found
+280--- Looking for pow in m
+--
+377:-- Looking for alloca - not found
+378--- Performing Test HAVE_SA_SIGACTION
+379--- Performing Test HAVE_SA_SIGACTION - Success
+380--- Looking for dlopen
+--
+399:-- Looking for include file pthread_np.h - not found
+400--- Performing Test HAVE_PTHREAD_SETNAME_NP
+401--- Performing Test HAVE_PTHREAD_SETNAME_NP - Success
+402--- Found Git: /usr/bin/git (found version "2.56.0")
+--
+556:-- Looking for pthread_create in pthreads - not found
+557--- Looking for pthread_create in pthread
+558:-- Looking for pthread_create in pthread - not found
+559--- Check if compiler accepts -pthread
+560--- Check if compiler accepts -pthread - yes
+561--- Found Threads: TRUE
+--
+564:-- Looking for fwrite_unlocked - not found
+565--- Looking for include file CommonCrypto/CommonCrypto.h
+566:-- Looking for include file CommonCrypto/CommonCrypto.h - not found
+567--- Could NOT find Nettle (missing: Nettle_LIBRARY Nettle_INCLUDE_DIR) (Required is at least version "3.0")
+568--- Could NOT find GnuTLS (missing: GNUTLS_LIBRARY GNUTLS_INCLUDE_DIR) 
+569--- Could NOT find MbedTLS (missing: MbedTLS_LIBRARY MbedTLS_INCLUDE_DIR) (Required is at least version "1.0")
+--
+572:-- Looking for _close - not found
+573--- Looking for _dup
+574:-- Looking for _dup - not found
+575--- Looking for _fdopen
+576:-- Looking for _fdopen - not found
+577--- Looking for _fileno
+578:-- Looking for _fileno - not found
+579--- Looking for _fseeki64
+580:-- Looking for _fseeki64 - not found
+581--- Looking for _fstat64
+582:-- Looking for _fstat64 - not found
+583--- Looking for _setmode
+584:-- Looking for _setmode - not found
+585--- Looking for _stat64
+586:-- Looking for _stat64 - not found
+587--- Looking for _snprintf
+588:-- Looking for _snprintf - not found
+589--- Looking for _snprintf_s
+590:-- Looking for _snprintf_s - not found
+591--- Looking for _snwprintf_s
+592:-- Looking for _snwprintf_s - not found
+593--- Looking for _strdup
+594:-- Looking for _strdup - not found
+595--- Looking for _strtoi64
+596:-- Looking for _strtoi64 - not found
+597--- Looking for _strtoui64
+598:-- Looking for _strtoui64 - not found
+599--- Looking for _unlink
+600:-- Looking for _unlink - not found
+601--- Looking for arc4random
+602--- Looking for arc4random - found
+603--- Looking for clonefile
+604:-- Looking for clonefile - not found
+605--- Looking for explicit_bzero
+606:-- Looking for explicit_bzero - not found
+607--- Looking for explicit_memset
+608:-- Looking for explicit_memset - not found
+609--- Looking for fchmod
+610--- Looking for fchmod - found
+611--- Looking for fileno
+--
+618:-- Looking for GetSecurityInfo - not found
+619--- Looking for localtime_r
+620--- Looking for localtime_r - found
+621--- Looking for localtime_s
+622:-- Looking for localtime_s - not found
+623--- Looking for memcpy_s
+624:-- Looking for memcpy_s - not found
+625--- Looking for random
+626--- Looking for random - found
+627--- Looking for setmode
+628:-- Looking for setmode - not found
+629--- Looking for snprintf
+630--- Looking for snprintf - found
+631--- Looking for snprintf_s
+632:-- Looking for snprintf_s - not found
+633--- Looking for strdup
+634--- Looking for strdup - found
+635--- Looking for strerror_s
+636:-- Looking for strerror_s - not found
+637--- Looking for strerrorlen_s
+638:-- Looking for strerrorlen_s - not found
+639--- Looking for stricmp
+640:-- Looking for stricmp - not found
+641--- Looking for strncpy_s
+642:-- Looking for strncpy_s - not found
+643--- Looking for 3 include files sys/types.h, ..., fts.h
+644--- Looking for 3 include files sys/types.h, ..., fts.h - found
+645--- Looking for fts_open
+--
+698:  -- bzip2 library not found; bzip2 support disabled
+699-
+700-
+701--- Could NOT find LibLZMA (missing: LIBLZMA_LIBRARY LIBLZMA_INCLUDE_DIR LIBLZMA_HAS_AUTO_DECODER LIBLZMA_HAS_EASY_ENCODER LIBLZMA_HAS_LZMA_PRESET) (Required is at least version "5.2")
+--
+703:  -- lzma library not found; lzma/xz support disabled
+704-
+705-
+706--- Could NOT find zstd (missing: _zstd_LIBRARY zstd_INCLUDE_DIR) (Required is at least version "1.4.0")
+--
+708:  -- zstd library not found; zstandard support disabled
+709-
+710-
+711-CMake Warning at build-android/_deps/libzip-src/CMakeLists.txt:278 (message):

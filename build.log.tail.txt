@@ -1,0 +1,300 @@
+  227 |     reset(__u.release());
+      |     ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/World.h:65:85: note: in instantiation of member function 'std::unique_ptr<RaceManager>::operator=' requested here
+   65 |     void SetRaceManager(std::unique_ptr<RaceManager> manager) { RaceManagerInstance = std::move(manager); }
+      |                                                                                     ^
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/Tools.cpp:2:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/PortMenu.h:6:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/Menu.h:7:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/Game.h:5:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/tracks/Track.h:11:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/objects/Lakitu.h:5:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/objects/Object.h:7:
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/editor/EditorMath.h:40:13: warning: unused function 'InverseMatrix' [-Wunused-function]
+   40 | static bool InverseMatrix(const float m[16], float invOut[16]);
+      |             ^~~~~~~~~~~~~
+21 warnings generated.
+[954/1003] Building C object CMakeFiles/Spaghettify.dir/src/racing/render_courses.c.o
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/racing/render_courses.c:81:20: warning: format specifies type 'unsigned long long' but the argument has type 'uint64_t' (aka 'unsigned long') [-Wformat]
+   80 |             printf("Warning: Could not find resource for section %d with crc 0x%llX\n", section->sectionId,
+      |                                                                                ~~~~
+      |                                                                                %lX
+   81 |                    section->crc);
+      |                    ^~~~~~~~~~~~
+1 warning generated.
+[955/1003] Building C object CMakeFiles/Spaghettify.dir/src/racing/race_logic.c.o
+[956/1003] Building C object CMakeFiles/Spaghettify.dir/src/animation.c.o
+[957/1003] Building C object CMakeFiles/Spaghettify.dir/src/code_800029B0.c.o
+[958/1003] Building C object CMakeFiles/Spaghettify.dir/src/camera.c.o
+[959/1003] Building C object CMakeFiles/Spaghettify.dir/src/code_8003DC40.c.o
+[960/1003] Building CXX object CMakeFiles/Spaghettify.dir/src/port/ui/TrackProperties.cpp.o
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.cpp:1:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.h:3:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/libultraship/libultraship.h:4:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/libultraship/bridge.h:7:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/libultraship/bridge/consolevariablebridge.h:9:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/ship/config/ConsoleVariable.h:4:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/build-android/_deps/nlohmann_json-src/include/nlohmann/json.hpp:40:
+/home/runner/work/SpaghettiKart/SpaghettiKart/build-android/_deps/nlohmann_json-src/include/nlohmann/detail/input/binary_reader.hpp:876:31: warning: use of infinity is undefined behavior due to the currently enabled floating-point options [-Wnan-infinity-disabled]
+  876 |                             ? std::numeric_limits<double>::infinity()
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/SpaghettiKart/SpaghettiKart/build-android/_deps/nlohmann_json-src/include/nlohmann/detail/input/binary_reader.hpp:2433:31: warning: use of infinity is undefined behavior due to the currently enabled floating-point options [-Wnan-infinity-disabled]
+ 2433 |                             ? std::numeric_limits<double>::infinity()
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.cpp:1:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.h:3:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/libultraship/libultraship.h:9:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/libultraship/classes.h:9:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/ship/Context.h:8:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/build-android/_deps/spdlog-src/include/spdlog/async.h:17:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/build-android/_deps/spdlog-src/include/spdlog/async_logger.h:17:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/build-android/_deps/spdlog-src/include/spdlog/logger.h:17:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/build-android/_deps/spdlog-src/include/spdlog/common.h:50:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/build-android/_deps/spdlog-src/include/spdlog/fmt/fmt.h:23:
+/home/runner/work/SpaghettiKart/SpaghettiKart/build-android/_deps/spdlog-src/include/spdlog/fmt/bundled/format.h:2618:23: warning: use of infinity is undefined behavior due to the currently enabled floating-point options [-Wnan-infinity-disabled]
+ 2618 |   constexpr T inf = T(std::numeric_limits<double>::infinity());
+      |                       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/SpaghettiKart/SpaghettiKart/build-android/_deps/spdlog-src/include/spdlog/fmt/bundled/format.h:2625:13: warning: use of infinity is undefined behavior due to the currently enabled floating-point options [-Wnan-infinity-disabled]
+ 2625 |   T inf = T(std::numeric_limits<double>::infinity());
+      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.cpp:2:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/PortMenu.h:6:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/Menu.h:6:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/MenuTypes.h:5:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/fast/Fast3dWindow.h:9:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/fast/interpreter.h:15:
+/home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/fast/lus_gbi.h:815:9: warning: '_LANGUAGE_C' macro redefined [-Wmacro-redefined]
+  815 | #define _LANGUAGE_C
+      |         ^
+<command line>:42:9: note: previous definition is here
+   42 | #define _LANGUAGE_C 1
+      |         ^
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.cpp:2:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/PortMenu.h:6:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/Menu.h:6:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/MenuTypes.h:5:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/fast/Fast3dWindow.h:9:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/fast/interpreter.h:18:
+/home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/fast/backends/gfx_rendering_api.h:65:39: warning: unused parameter 'x' [-Wunused-parameter]
+   65 |     virtual void ClearDepthRegion(int x, int y, int w, int h) {
+      |                                       ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/fast/backends/gfx_rendering_api.h:65:46: warning: unused parameter 'y' [-Wunused-parameter]
+   65 |     virtual void ClearDepthRegion(int x, int y, int w, int h) {
+      |                                              ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/fast/backends/gfx_rendering_api.h:65:53: warning: unused parameter 'w' [-Wunused-parameter]
+   65 |     virtual void ClearDepthRegion(int x, int y, int w, int h) {
+      |                                                     ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/fast/backends/gfx_rendering_api.h:65:60: warning: unused parameter 'h' [-Wunused-parameter]
+   65 |     virtual void ClearDepthRegion(int x, int y, int w, int h) {
+      |                                                            ^
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.cpp:2:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/PortMenu.h:6:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/Menu.h:7:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/Game.h:5:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/tracks/Track.h:11:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/objects/Lakitu.h:6:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/World.h:19:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/sky/SkyCloud.h:6:
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/sky/SkyActor.h:22:29: warning: unused parameter 'screen' [-Wunused-parameter]
+   22 |     SkyActor(ScreenContext* screen, u16 cloudVariant, u16 posY, u16 rotY, u16 scalePercent) {};
+      |                             ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/sky/SkyActor.h:22:41: warning: unused parameter 'cloudVariant' [-Wunused-parameter]
+   22 |     SkyActor(ScreenContext* screen, u16 cloudVariant, u16 posY, u16 rotY, u16 scalePercent) {};
+      |                                         ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/sky/SkyActor.h:22:59: warning: unused parameter 'posY' [-Wunused-parameter]
+   22 |     SkyActor(ScreenContext* screen, u16 cloudVariant, u16 posY, u16 rotY, u16 scalePercent) {};
+      |                                                           ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/sky/SkyActor.h:22:69: warning: unused parameter 'rotY' [-Wunused-parameter]
+   22 |     SkyActor(ScreenContext* screen, u16 cloudVariant, u16 posY, u16 rotY, u16 scalePercent) {};
+      |                                                                     ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/sky/SkyActor.h:22:79: warning: unused parameter 'scalePercent' [-Wunused-parameter]
+   22 |     SkyActor(ScreenContext* screen, u16 cloudVariant, u16 posY, u16 rotY, u16 scalePercent) {};
+      |                                                                               ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/sky/SkyActor.h:25:38: warning: unused parameter 'ctx' [-Wunused-parameter]
+   25 |     virtual void Draw(ScreenContext* ctx, s32 arg0) {};
+      |                                      ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/sky/SkyActor.h:25:47: warning: unused parameter 'arg0' [-Wunused-parameter]
+   25 |     virtual void Draw(ScreenContext* ctx, s32 arg0) {};
+      |                                               ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.cpp:466:31: warning: comparison of integers of different signs: 'int32_t' (aka 'int') and 'size_type' (aka 'unsigned long') [-Wsign-compare]
+  466 |         for (int32_t i = 0; i < track->TourShots.size(); i++)
+      |                             ~ ^ ~~~~~~~~~~~~~~~~~~~~~~~
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.cpp:513:39: warning: comparison of integers of different signs: 'int32_t' (aka 'int') and 'size_type' (aka 'unsigned long') [-Wsign-compare]
+  513 |                 for (int32_t k = 0; k < shot.Frames.size(); k++)
+      |                                     ~ ^ ~~~~~~~~~~~~~~~~~~
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.cpp:2:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/PortMenu.h:6:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/Menu.h:7:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/Game.h:5:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/tracks/Track.h:5:
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/CoreMath.h:147:15: warning: definition of implicit copy constructor for 'IRotator' is deprecated because it has a user-provided copy assignment operator [-Wdeprecated-copy-with-user-provided-copy]
+  147 |     IRotator& operator=(const IRotator& other) {
+      |               ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__memory/construct_at.h:40:49: note: in implicit copy constructor for 'IRotator' first required here
+   40 |   return ::new (static_cast<void*>(__location)) _Tp(std::forward<_Args>(__args)...);
+      |                                                 ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__memory/construct_at.h:48:15: note: in instantiation of function template specialization 'std::construct_at<IRotator, IRotator, IRotator *>' requested here
+   48 |   return std::construct_at(__location, std::forward<_Args>(__args)...);
+      |               ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/optional:370:10: note: in instantiation of function template specialization 'std::__construct_at<IRotator, IRotator, IRotator *>' requested here
+  370 |     std::__construct_at(std::addressof(this->__val_), std::forward<_Args>(__args)...);
+      |          ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/optional:742:13: note: in instantiation of function template specialization 'std::__optional_storage_base<IRotator>::__construct<IRotator>' requested here
+  742 |       this->__construct(std::forward<_Up>(__v));
+      |             ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/SpawnParams.h:17:17: note: in instantiation of function template specialization 'std::optional<IRotator>::operator=<IRotator, 0>' requested here
+   17 |         opt_val = j.at(key).get<T>();
+      |                 ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/SpawnParams.h:75:9: note: in instantiation of function template specialization 'get_optional_to<IRotator>' requested here
+   75 |         get_optional_to(j, "Rotation", Rotation);
+      |         ^
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.cpp:2:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/PortMenu.h:6:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/Menu.h:7:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/Game.h:5:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/tracks/Track.h:5:
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/CoreMath.h:106:16: warning: definition of implicit copy constructor for 'FVector2D' is deprecated because it has a user-provided copy assignment operator [-Wdeprecated-copy-with-user-provided-copy]
+  106 |     FVector2D& operator=(const FVector2D& other) {
+      |                ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__memory/construct_at.h:40:49: note: in implicit copy constructor for 'FVector2D' first required here
+   40 |   return ::new (static_cast<void*>(__location)) _Tp(std::forward<_Args>(__args)...);
+      |                                                 ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__memory/construct_at.h:48:15: note: in instantiation of function template specialization 'std::construct_at<FVector2D, FVector2D, FVector2D *>' requested here
+   48 |   return std::construct_at(__location, std::forward<_Args>(__args)...);
+      |               ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/optional:370:10: note: in instantiation of function template specialization 'std::__construct_at<FVector2D, FVector2D, FVector2D *>' requested here
+  370 |     std::__construct_at(std::addressof(this->__val_), std::forward<_Args>(__args)...);
+      |          ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/optional:742:13: note: in instantiation of function template specialization 'std::__optional_storage_base<FVector2D>::__construct<FVector2D>' requested here
+  742 |       this->__construct(std::forward<_Up>(__v));
+      |             ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/SpawnParams.h:17:17: note: in instantiation of function template specialization 'std::optional<FVector2D>::operator=<FVector2D, 0>' requested here
+   17 |         opt_val = j.at(key).get<T>();
+      |                 ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/SpawnParams.h:78:9: note: in instantiation of function template specialization 'get_optional_to<FVector2D>' requested here
+   78 |         get_optional_to(j, "PatrolStart", PatrolStart);
+      |         ^
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.cpp:2:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/PortMenu.h:6:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/Menu.h:7:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/Game.h:5:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/tracks/Track.h:5:
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/CoreMath.h:231:16: warning: definition of implicit copy constructor for 'IPathSpan' is deprecated because it has a user-provided copy assignment operator [-Wdeprecated-copy-with-user-provided-copy]
+  231 |     IPathSpan& operator=(const IPathSpan& Other) {
+      |                ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__memory/construct_at.h:40:49: note: in implicit copy constructor for 'IPathSpan' first required here
+   40 |   return ::new (static_cast<void*>(__location)) _Tp(std::forward<_Args>(__args)...);
+      |                                                 ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__memory/construct_at.h:48:15: note: in instantiation of function template specialization 'std::construct_at<IPathSpan, IPathSpan, IPathSpan *>' requested here
+   48 |   return std::construct_at(__location, std::forward<_Args>(__args)...);
+      |               ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/optional:370:10: note: in instantiation of function template specialization 'std::__construct_at<IPathSpan, IPathSpan, IPathSpan *>' requested here
+  370 |     std::__construct_at(std::addressof(this->__val_), std::forward<_Args>(__args)...);
+      |          ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/optional:742:13: note: in instantiation of function template specialization 'std::__optional_storage_base<IPathSpan>::__construct<IPathSpan>' requested here
+  742 |       this->__construct(std::forward<_Up>(__v));
+      |             ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/SpawnParams.h:17:17: note: in instantiation of function template specialization 'std::optional<IPathSpan>::operator=<IPathSpan, 0>' requested here
+   17 |         opt_val = j.at(key).get<T>();
+      |                 ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/SpawnParams.h:80:9: note: in instantiation of function template specialization 'get_optional_to<IPathSpan>' requested here
+   80 |         get_optional_to(j, "PathSpan", PathSpan);
+      |         ^
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.cpp:1:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.h:3:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/libultraship/libultraship.h:4:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/libultraship/bridge.h:3:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/libultraship/bridge/resourcebridge.h:8:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/ship/resource/Resource.h:3:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/libultraship/include/ship/resource/File.h:3:
+In file included from /usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/string:653:
+In file included from /usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/string_view:951:
+In file included from /usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/algorithm:1865:
+In file included from /usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__algorithm/inplace_merge.h:27:
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__memory/unique_ptr.h:76:5: warning: delete called on non-final 'RaceManager' that has virtual functions but non-virtual destructor [-Wdelete-non-abstract-non-virtual-dtor]
+   76 |     delete __ptr;
+      |     ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__memory/unique_ptr.h:287:7: note: in instantiation of member function 'std::default_delete<RaceManager>::operator()' requested here
+  287 |       __deleter_(__tmp);
+      |       ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/c++/v1/__memory/unique_ptr.h:227:5: note: in instantiation of member function 'std::unique_ptr<RaceManager>::reset' requested here
+  227 |     reset(__u.release());
+      |     ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/World.h:65:85: note: in instantiation of member function 'std::unique_ptr<RaceManager>::operator=' requested here
+   65 |     void SetRaceManager(std::unique_ptr<RaceManager> manager) { RaceManagerInstance = std::move(manager); }
+      |                                                                                     ^
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/TrackProperties.cpp:2:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/PortMenu.h:6:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/ui/Menu.h:7:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/port/Game.h:5:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/tracks/Track.h:11:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/objects/Lakitu.h:5:
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/objects/Object.h:7:
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/engine/editor/EditorMath.h:40:13: warning: unused function 'InverseMatrix' [-Wunused-function]
+   40 | static bool InverseMatrix(const float m[16], float invOut[16]);
+      |             ^~~~~~~~~~~~~
+23 warnings generated.
+[961/1003] Building C object CMakeFiles/Spaghettify.dir/src/code_80057C60_var.c.o
+[962/1003] Building C object CMakeFiles/Spaghettify.dir/src/racing/skybox_and_splitscreen.c.o
+[963/1003] Building C object CMakeFiles/Spaghettify.dir/src/code_8006E9C0.c.o
+[964/1003] Building C object CMakeFiles/Spaghettify.dir/src/code_80091440.c.o
+[965/1003] Building C object CMakeFiles/Spaghettify.dir/src/code_800AF9B0.c.o
+[966/1003] Building C object CMakeFiles/Spaghettify.dir/src/course_metadata.c.o
+[967/1003] Building C object CMakeFiles/Spaghettify.dir/src/crash_screen.c.o
+[968/1003] Building C object CMakeFiles/Spaghettify.dir/src/code_80086E70.c.o
+[969/1003] Building C object CMakeFiles/Spaghettify.dir/src/gbiMacro.c.o
+In file included from /home/runner/work/SpaghettiKart/SpaghettiKart/src/gbiMacro.c:6:
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/port/interpolation/matrix.h:30:9: warning: 'M_PI' macro redefined [-Wmacro-redefined]
+   30 | #define M_PI    3.14159265358979323846f
+      |         ^
+/usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/math.h:324:9: note: previous definition is here
+  324 | #define M_PI            3.14159265358979323846  /* pi */
+      |         ^
+1 warning generated.
+[970/1003] Building C object CMakeFiles/Spaghettify.dir/src/code_80005FD0.c.o
+[971/1003] Building C object CMakeFiles/Spaghettify.dir/src/code_80057C60.c.o
+[972/1003] Building C object CMakeFiles/Spaghettify.dir/src/main.c.o
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/main.c:486:9: warning: unused variable 'players' [-Wunused-variable]
+  486 |     s32 players = Netplay_PlayerCount();
+      |         ^~~~~~~
+1 warning generated.
+[973/1003] Building C object CMakeFiles/Spaghettify.dir/src/harbour_masters.c.o
+[974/1003] Building C object CMakeFiles/Spaghettify.dir/src/effects.c.o
+[975/1003] Building C object CMakeFiles/Spaghettify.dir/src/math_util_2.c.o
+[976/1003] Building C object CMakeFiles/Spaghettify.dir/src/os/guLookAtF.c.o
+[977/1003] Building C object CMakeFiles/Spaghettify.dir/src/kart_dma.c.o
+[978/1003] Building C object CMakeFiles/Spaghettify.dir/src/menus.c.o
+[979/1003] Building C object CMakeFiles/Spaghettify.dir/src/os/guMtxCatF.c.o
+[980/1003] Building C object CMakeFiles/Spaghettify.dir/src/os/guMtxCatL.c.o
+[981/1003] Building C object CMakeFiles/Spaghettify.dir/src/os/guNormalize.c.o
+[982/1003] Building C object CMakeFiles/Spaghettify.dir/src/os/guMtxF2L.c.o
+[983/1003] Building C object CMakeFiles/Spaghettify.dir/src/os/guOrthoF.c.o
+[984/1003] Building C object CMakeFiles/Spaghettify.dir/src/os/guPerspectiveF.c.o
+[985/1003] Building C object CMakeFiles/Spaghettify.dir/src/os/guRotateF.c.o
+[986/1003] Building C object CMakeFiles/Spaghettify.dir/src/os/guScaleF.c.o
+[987/1003] Building C object CMakeFiles/Spaghettify.dir/src/os/guTranslateF.c.o
+[988/1003] Building C object CMakeFiles/Spaghettify.dir/src/profiler.c.o
+[989/1003] Building C object CMakeFiles/Spaghettify.dir/src/render_player.c.o
+[990/1003] Building C object CMakeFiles/Spaghettify.dir/src/replays.c.o
+[991/1003] Building C object CMakeFiles/Spaghettify.dir/src/player_controller.c.o
+[992/1003] Building C object CMakeFiles/Spaghettify.dir/src/spawn_players.c.o
+[993/1003] Building C object CMakeFiles/Spaghettify.dir/src/stubs.c.o
+[994/1003] Building C object CMakeFiles/Spaghettify.dir/src/save.c.o
+[995/1003] Linking CXX static library libultraship/src/libultraship.a
+[996/1003] Linking CXX static library torch/libtorch.a
+[997/1003] Linking C static library _deps/vorbis-build/lib/libvorbisenc.a
+[998/1003] Linking C static library _deps/vorbis-build/lib/libvorbisfile.a
+[999/1003] Building C object CMakeFiles/Spaghettify.dir/src/render_objects.c.o
+[1000/1003] Building C object CMakeFiles/Spaghettify.dir/src/update_objects.c.o
+[1001/1003] Building C object CMakeFiles/Spaghettify.dir/src/menu_items.c.o
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/menu_items.c:2002:14: warning: overflow converting case value to switch condition type (-85 to 171) [-Wswitch]
+ 2002 |         case -85:
+      |              ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/menu_items.c:1958:14: warning: overflow converting case value to switch condition type (-93 to 163) [-Wswitch]
+ 1958 |         case -93:
+      |              ^
+/home/runner/work/SpaghettiKart/SpaghettiKart/src/menu_items.c:1921:14: warning: overflow converting case value to switch condition type (-95 to 161) [-Wswitch]
+ 1921 |         case -95:
+      |              ^
+3 warnings generated.
+[1002/1003] Linking CXX shared library libmain.so
