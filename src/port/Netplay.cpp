@@ -77,6 +77,10 @@ Slot sSlots[kRing];
 HashSlot sMyHash[kRing];
 HashSlot sPeerHash[NETPLAY_MAX_PLAYERS][kRing];
 
+#ifdef __ANDROID__
+constexpr const char* kLogFile = "/sdcard/Android/data/dev.mdhigino.mk64family/files/netplay.log";
+#endif
+
 void Log(const char* fmt, ...) {
     char buf[256];
     va_list ap;
@@ -85,6 +89,13 @@ void Log(const char* fmt, ...) {
     va_end(ap);
 #ifdef __ANDROID__
     __android_log_print(ANDROID_LOG_INFO, "Netplay", "%s", buf);
+    // Also keep our own log file: the system log can come back empty on some phones.
+    if (FILE* lf = fopen(kLogFile, "a")) {
+        timespec ts;
+        clock_gettime(CLOCK_REALTIME, &ts);
+        fprintf(lf, "[%ld] %s\n", static_cast<long>(ts.tv_sec), buf);
+        fclose(lf);
+    }
 #else
     fprintf(stderr, "[Netplay] %s\n", buf);
 #endif
@@ -553,13 +564,21 @@ int Netplay_Start(const char* cfgPath) {
     if (sActive) {
         return 1;
     }
+#ifdef __ANDROID__
+    if (FILE* lf = fopen(kLogFile, "w")) { // fresh log for this run
+        fclose(lf);
+    }
+#endif
     Config c;
 #ifdef __ANDROID__
     const char* defaultPath = "/sdcard/Android/data/dev.mdhigino.mk64family/files/netplay.cfg";
 #else
     const char* defaultPath = "netplay.cfg";
 #endif
-    if (!ReadConfig(cfgPath ? cfgPath : defaultPath, c) || !c.on) {
+    bool cfgRead = ReadConfig(cfgPath ? cfgPath : defaultPath, c);
+    Log("Netplay_Start: config %s, mode=%s, relay='%s', room=%u, players=%d, delay=%d", cfgRead ? "read" : "NOT FOUND",
+        !c.on ? "off" : (c.host ? "host" : "client"), c.relay, c.room, c.players, c.delay);
+    if (!cfgRead || !c.on) {
         return 0;
     }
     if (c.players < 2) c.players = 2;
@@ -629,7 +648,7 @@ int Netplay_Start(const char* cfgPath) {
     memset(&bindAddr, 0, sizeof(bindAddr));
     bindAddr.sin_family = AF_INET;
     bindAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    bindAddr.sin_port = htons(sHost ? sPort : 0);
+    bindAddr.sin_port = htons((sHost && !sRelay) ? sPort : 0); // relay mode: any free port
     if (bind(sSock, reinterpret_cast<sockaddr*>(&bindAddr), sizeof(bindAddr)) < 0) {
         Log("bind() failed: %s", strerror(errno));
         CloseSocket();
@@ -639,7 +658,7 @@ int Netplay_Start(const char* cfgPath) {
     int64_t t0 = NowMs();
     if (sHost) {
         sIndex = 0;
-        Log("host: waiting for %d player(s) on UDP port %d", sPlayers - 1, sPort);
+        Log("host: waiting for %d player(s)%s", sPlayers - 1, sRelay ? " through the relay" : "");
         int64_t lastReg = 0;
         for (;;) {
             if (sRelay && NowMs() - lastReg >= 1000) {
@@ -678,7 +697,7 @@ int Netplay_Start(const char* cfgPath) {
                 return 0;
             }
         }
-        Log("client: looking for host %s:%d", c.hostIp, sPort);
+        Log("client: looking for the host%s", sRelay ? " through the relay" : "");
         bool started = false;
         int64_t lastHello = 0;
         while (!started) {
