@@ -48,6 +48,17 @@ jobs:
           mkdir -p android/app/src/main/assets
           cp spaghetti.o2r android/app/src/main/assets/spaghetti.o2r
 
+      # Retro menu fonts (SIL Open Font License). If the download fails the app falls back to a system font.
+      - name: Download menu fonts
+        continue-on-error: true
+        run: |
+          mkdir -p android/app/src/main/assets/fonts
+          curl -fsSL -o android/app/src/main/assets/fonts/PressStart2P-Regular.ttf \
+            https://raw.githubusercontent.com/google/fonts/main/ofl/pressstart2p/PressStart2P-Regular.ttf
+          curl -fsSL -o android/app/src/main/assets/fonts/VT323-Regular.ttf \
+            https://raw.githubusercontent.com/google/fonts/main/ofl/vt323/VT323-Regular.ttf
+          ls -la android/app/src/main/assets/fonts
+
       - name: Configure native build (arm64)
         run: |
           set -o pipefail

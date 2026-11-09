@@ -24,6 +24,13 @@ public class MainActivity extends SDLActivity {
         // This also creates that folder on the very first launch.
         saveLogOfPreviousRun();
         installBundledEngineAssets();
+        try {
+            File d = getExternalFilesDir(null);
+            if (d != null) {
+                new File(d, "netplay.status").delete(); // stale state from an earlier run
+            }
+        } catch (Throwable ignored) {
+        }
         super.onCreate(savedInstanceState);
 
         // On-screen controls, drawn over the game surface (mLayout is SDLActivity's root).
@@ -34,6 +41,21 @@ public class MainActivity extends SDLActivity {
                 mLayout.addView(new TouchControlsView(this),
                         new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                                                         ViewGroup.LayoutParams.MATCH_PARENT));
+            }
+        } catch (Throwable ignored) {
+        }
+
+        // Waiting room over the game while the other phones join (only when a room was created/joined).
+        try {
+            File d = getExternalFilesDir(null);
+            if (d != null && mLayout != null) {
+                java.util.Map<String, String> cfg = WaitingOverlay.readKv(new File(d, "netplay.cfg"));
+                String mode = cfg.get("mode");
+                if ("host".equals(mode) || "client".equals(mode)) {
+                    mLayout.addView(new WaitingOverlay(this, d, cfg),
+                            new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                                                            ViewGroup.LayoutParams.MATCH_PARENT));
+                }
             }
         } catch (Throwable ignored) {
         }

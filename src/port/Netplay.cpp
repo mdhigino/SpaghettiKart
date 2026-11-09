@@ -79,7 +79,20 @@ HashSlot sPeerHash[NETPLAY_MAX_PLAYERS][kRing];
 
 #ifdef __ANDROID__
 constexpr const char* kLogFile = "/sdcard/Android/data/dev.mdhigino.mk64family/files/netplay.log";
+constexpr const char* kStatusFile = "/sdcard/Android/data/dev.mdhigino.mk64family/files/netplay.status";
 #endif
+
+// Tiny status file the Java waiting-room screen polls: "state=waiting|started|failed", "joined=N", "players=N".
+void WriteStatus(const char* state, int joined, int players) {
+#ifdef __ANDROID__
+    if (FILE* f = fopen(kStatusFile, "w")) {
+        fprintf(f, "state=%s\njoined=%d\nplayers=%d\n", state, joined, players);
+        fclose(f);
+    }
+#else
+    (void)state; (void)joined; (void)players;
+#endif
+}
 
 void Log(const char* fmt, ...) {
     char buf[256];
@@ -660,6 +673,8 @@ int Netplay_Start(const char* cfgPath) {
         sIndex = 0;
         Log("host: waiting for %d player(s)%s", sPlayers - 1, sRelay ? " through the relay" : "");
         int64_t lastReg = 0;
+        WriteStatus("waiting", 1, sPlayers);
+        int lastJoined = -1;
         for (;;) {
             if (sRelay && NowMs() - lastReg >= 1000) {
                 RelayRegisterHost();
@@ -670,11 +685,16 @@ int Netplay_Start(const char* cfgPath) {
             for (int i = 1; i < sPlayers; i++) {
                 joined += sPeerKnown[i] ? 1 : 0;
             }
+            if (joined != lastJoined) {
+                lastJoined = joined;
+                WriteStatus("waiting", joined + 1, sPlayers);
+            }
             if (joined == sPlayers - 1) {
                 break;
             }
             if (NowMs() - t0 > kJoinTimeoutMs) {
                 Log("host: gave up waiting for players");
+                WriteStatus("failed", joined + 1, sPlayers);
                 CloseSocket();
                 return 0;
             }
@@ -698,6 +718,7 @@ int Netplay_Start(const char* cfgPath) {
             }
         }
         Log("client: looking for the host%s", sRelay ? " through the relay" : "");
+        WriteStatus("waiting", 0, 0);
         bool started = false;
         int64_t lastHello = 0;
         while (!started) {
@@ -731,6 +752,7 @@ int Netplay_Start(const char* cfgPath) {
             }
             if (NowMs() - t0 > kJoinTimeoutMs) {
                 Log("client: host not found");
+                WriteStatus("failed", 0, 0);
                 CloseSocket();
                 return 0;
             }
@@ -745,6 +767,7 @@ int Netplay_Start(const char* cfgPath) {
         }
     }
     sActive = true;
+    WriteStatus("started", sPlayers, sPlayers);
     Log("session started: %d players, input delay %d frames, I am player %d", sPlayers, sDelay, sIndex);
     return 1;
 }
