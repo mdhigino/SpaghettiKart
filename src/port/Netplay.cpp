@@ -60,6 +60,7 @@ bool sActive = false;
 bool sHost = false;
 bool sDesynced = false;
 bool sFullScreen = true;
+bool sBattleAI = false; // host decides; sent to the clients in the START packet
 int sSock = -1;
 int sPort = 27015;
 int sPlayers = 2;
@@ -326,6 +327,7 @@ void SendStart(const sockaddr_in& to, int index) {
     w.u8(static_cast<uint8_t>(index));
     w.u8(static_cast<uint8_t>(sPlayers));
     w.u8(static_cast<uint8_t>(sDelay));
+    w.u8(sBattleAI ? 1 : 0); // flags
     SendTo(w, to);
 }
 
@@ -511,6 +513,7 @@ struct Config {
     int port = 27015;
     int delay = 3;
     bool fullscreen = true;
+    bool battleAI = false;
     char relay[96] = {0};
     uint32_t room = 0;
     char hostIp[64] = {0};
@@ -541,6 +544,8 @@ bool ReadConfig(const char* path, Config& c) {
             strncpy(c.relay, val, sizeof(c.relay) - 1);
         } else if (!strcmp(line, "room")) {
             c.room = static_cast<uint32_t>(strtoul(val, nullptr, 10));
+        } else if (!strcmp(line, "battle")) {
+            c.battleAI = !strcmp(val, "ai");
         } else if (!strcmp(line, "fullscreen")) {
             c.fullscreen = atoi(val) != 0;
         } else if (!strcmp(line, "delay")) {
@@ -631,6 +636,7 @@ int Netplay_Start(const char* cfgPath) {
         }
     }
     sFullScreen = c.fullscreen;
+    sBattleAI = c.battleAI;
     sPort = c.port;
     sPlayers = c.players;
     sDelay = c.delay;
@@ -743,6 +749,7 @@ int Netplay_Start(const char* cfgPath) {
                         sIndex = r.u8();
                         sPlayers = r.u8();
                         sDelay = r.u8();
+                        sBattleAI = (r.u8() & 1) != 0;
                         if (r.ok && sIndex > 0 && sIndex < sPlayers && sPlayers <= NETPLAY_MAX_PLAYERS) {
                             sFullMask = (1u << sPlayers) - 1;
                             started = true;
@@ -777,6 +784,25 @@ int Netplay_LocalIndex(void) { return sActive ? sIndex : -1; }
 int Netplay_PlayerCount(void) { return sActive ? sPlayers : 0; }
 int Netplay_Desynced(void) { return sDesynced ? 1 : 0; }
 int Netplay_FullScreen(void) { return sFullScreen ? 1 : 0; }
+
+// battle=ai in netplay.cfg: empty Battle slots are filled with computer players. Works with or without a
+// network session, so the config is read on its own (once).
+int Netplay_BattleAI(void) {
+    if (sActive) {
+        return sBattleAI ? 1 : 0; // every phone must agree, so the host's choice wins
+    }
+    static int sCached = -1;
+    if (sCached < 0) {
+        Config c;
+#ifdef __ANDROID__
+        const char* path = "/sdcard/Android/data/dev.mdhigino.mk64family/files/netplay.cfg";
+#else
+        const char* path = "netplay.cfg";
+#endif
+        sCached = (ReadConfig(path, c) && c.battleAI) ? 1 : 0;
+    }
+    return sCached;
+}
 
 int Netplay_Frame(const NetplayInput* local, uint32_t stateHash, NetplayInput* out) {
     if (!sActive) {
@@ -854,6 +880,7 @@ int Netplay_PlayerCount(void) { return 0; }
 int Netplay_Frame(const NetplayInput*, uint32_t, NetplayInput*) { return 0; }
 int Netplay_Desynced(void) { return 0; }
 int Netplay_FullScreen(void) { return 0; }
+int Netplay_BattleAI(void) { return 0; }
 void Netplay_Stop(void) {}
 }
 

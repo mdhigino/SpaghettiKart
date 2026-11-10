@@ -45,6 +45,7 @@ public class LobbyActivity extends Activity {
     // create-room state
     private int players = 2;
     private boolean fullScreen = true;
+    private boolean battleAi = false;
     // join-screen state
     private boolean joinOnline = true;
     private final StringBuilder code = new StringBuilder();
@@ -57,6 +58,7 @@ public class LobbyActivity extends Activity {
         prefs = getSharedPreferences("lobby", MODE_PRIVATE);
         players = Math.max(2, Math.min(4, prefs.getInt("players", 2)));
         fullScreen = prefs.getBoolean("fullscreen", true);
+        battleAi = prefs.getBoolean("battleAi", false);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN
                 | WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
@@ -271,15 +273,14 @@ public class LobbyActivity extends Activity {
 
         left.addView(label("REGRA DO BATTLE"));
         LinearLayout rules = rowOf();
-        TextView r1 = chip(this, "CADA UM POR SI", true);
+        final TextView r1 = chip(this, "CADA UM POR SI", !battleAi);
         TextView r2 = chip(this, "EM TIMES", false);
-        TextView r3 = chip(this, "COM IA", false);
-        for (TextView t : new TextView[] { r2, r3 }) { // not implemented in the game yet
-            t.setAlpha(0.45f);
-            t.setClickable(false);
-        }
+        final TextView r3 = chip(this, "COM IA", battleAi);
+        r2.setAlpha(0.45f); // not implemented in the game yet
+        r2.setClickable(false);
         r2.setText("EM TIMES (em breve)");
-        r3.setText("COM IA (em breve)");
+        r1.setOnClickListener(v -> setAi(false, online));
+        r3.setOnClickListener(v -> setAi(true, online));
         LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT);
         cp.setMargins(0, 0, px(1.2f), 0);
@@ -326,7 +327,10 @@ public class LobbyActivity extends Activity {
         panel(right, false);
         right.addView(label("SUA SALA"));
         right.addView(summary(online ? "Internet" : "Wi-Fi local", false));
-        right.addView(summary("BATTLE: CADA UM POR SI", true));
+        right.addView(summary(battleAi ? "BATTLE: COM IA" : "BATTLE: CADA UM POR SI", true));
+        if (battleAi) {
+            right.addView(summary("IA completa at\u00E9 4 karts", false));
+        }
         right.addView(summary(players + " jogadores", false));
         View spacer = new View(this);
         right.addView(spacer, new LinearLayout.LayoutParams(1, 0, 1f));
@@ -342,6 +346,12 @@ public class LobbyActivity extends Activity {
         View steps = steps(1);
         page("create", "CRIAR SALA", online ? "SALA PELA INTERNET" : "SALA NO WI-FI", steps, cols,
                 "Os outros celulares seguem a sua escolha");
+    }
+
+    private void setAi(boolean on, boolean online) {
+        battleAi = on;
+        prefs.edit().putBoolean("battleAi", on).apply();
+        showCreate(online);
     }
 
     private TextView summary(String s, boolean accent) {
@@ -494,6 +504,16 @@ public class LobbyActivity extends Activity {
         LinearLayout fsRow = rowOf();
         fsRow.addView(fs);
         left.addView(fsRow);
+        left.addView(label("BATTLE COM IA (completa at\u00E9 4 karts)"));
+        final TextView ai = chip(this, battleAi ? "LIGADO" : "DESLIGADO", battleAi);
+        ai.setOnClickListener(v -> {
+            battleAi = !battleAi;
+            ai.setText(battleAi ? "LIGADO" : "DESLIGADO");
+            setChipSelected(ai, battleAi);
+        });
+        LinearLayout aiRow = rowOf();
+        aiRow.addView(ai);
+        left.addView(aiRow);
         View spacer = new View(this);
         left.addView(spacer, new LinearLayout.LayoutParams(1, 0, 1f));
         View save = bigButton(this, GREEN, "SALVAR E VOLTAR", null, false);
@@ -504,7 +524,8 @@ public class LobbyActivity extends Activity {
                 relay.setError("Use endereço:porta");
                 return;
             }
-            prefs.edit().putString("relay", r).putBoolean("fullscreen", fullScreen).apply();
+            prefs.edit().putString("relay", r).putBoolean("fullscreen", fullScreen).putBoolean("battleAi", battleAi)
+                    .apply();
             showMenu();
         });
         left.addView(save, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -586,7 +607,7 @@ public class LobbyActivity extends Activity {
                     w.write("port=" + PORT + "\n");
                     w.write("delay=" + delay + "\n");
                     w.write("fullscreen=" + (fullScreen ? 1 : 0) + "\n");
-                    w.write("battle=normal\n");
+                    w.write("battle=" + (battleAi ? "ai" : "normal") + "\n");
                     if (!relay.isEmpty()) {
                         w.write("relay=" + relay + "\n");
                         w.write("room=" + room + "\n");

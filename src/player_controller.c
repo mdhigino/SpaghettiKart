@@ -21,6 +21,7 @@
 #include "code_80005FD0.h"
 #include "sounds.h"
 #include "port/Game.h"
+#include "enhancements/battle_bots.h"
 #include "src/enhancements/moon_jump.h"
 #include "engine/Matrix.h"
 
@@ -4452,12 +4453,18 @@ void handle_a_press_for_all_players_during_race(void) {
         case SCREEN_MODE_2P_SPLITSCREEN_VERTICAL:
             handle_a_press_for_player_during_race(gPlayerOne, gControllerOne, 0);
             handle_a_press_for_player_during_race(gPlayerTwo, gControllerTwo, 1);
+            if (BattleBots_IsBot(2)) {
+                handle_a_press_for_player_during_race(gPlayerThree, gControllerThree, 2);
+            }
+            if (BattleBots_IsBot(3)) {
+                handle_a_press_for_player_during_race(gPlayerFour, gControllerFour, 3);
+            }
             return;
         case SCREEN_MODE_3P_4P_SPLITSCREEN:
             handle_a_press_for_player_during_race(gPlayerOne, gControllerOne, 0);
             handle_a_press_for_player_during_race(gPlayerTwo, gControllerTwo, 1);
             handle_a_press_for_player_during_race(gPlayerThree, gControllerThree, 2);
-            if (gPlayerCountSelection1 == 4) {
+            if ((gPlayerCountSelection1 == 4) || BattleBots_IsBot(3)) {
                 handle_a_press_for_player_during_race(gPlayerFour, gControllerFour, 3);
             }
             break;

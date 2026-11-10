@@ -13,6 +13,7 @@
 //   port=27015
 //   delay=3             (input delay in frames, host decides)
 //   fullscreen=1       (each phone draws only its own player, full screen)
+//   battle=ai          (Battle: empty slots up to 4 karts are driven by the computer)
 // No file (or mode=off) means normal single-device play.
 #pragma once
 
@@ -52,6 +53,9 @@ int Netplay_Frame(const NetplayInput* local, uint32_t stateHash, NetplayInput* o
 
 // 1 when each phone should draw only its own player, full screen (config key fullscreen=1, default).
 int Netplay_FullScreen(void);
+
+// 1 when the config asks for computer players in Battle (key battle=ai).
+int Netplay_BattleAI(void);
 
 // 1 once a state mismatch between phones has been detected.
 int Netplay_Desynced(void);

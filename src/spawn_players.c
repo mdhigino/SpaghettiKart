@@ -28,6 +28,7 @@
 #include "effects.h"
 #include "decode.h"
 #include "port/Game.h"
+#include "enhancements/battle_bots.h"
 
 f32 D_80165210[8];
 f32 D_80165230[8];
@@ -877,6 +878,7 @@ void func_8003BE30(void) {
 void func_8003C0F0(void) {
     if (gModeSelection == BATTLE) {
         func_8000EEDC();
+        BattleBots_Prepare();
     } else if (!IsPodiumCeremony()) {
         init_course_path_point();
     }
@@ -1149,6 +1151,8 @@ void spawn_and_set_player_spawns(void) {
 
     if (gModeSelection != BATTLE) {
         init_players();
+    } else {
+        BattleBots_Finish();
     }
 }
 

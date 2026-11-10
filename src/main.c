@@ -40,6 +40,7 @@
 #include "port/Game.h"
 #include "port/Engine.h"
 #include "port/Netplay.h"
+#include "enhancements/battle_bots.h"
 #include "engine/Matrix.h"
 #include "engine/TrackBrowser.h"
 
@@ -516,6 +517,7 @@ void read_controllers(void) {
     // osRecvMesg(&gSIEventMesgQueue, &msg, OS_MESG_BLOCK);
     osContGetReadData(gControllerPads);
     netplay_exchange_inputs();
+    BattleBots_Drive();
     update_controller(0);
     update_controller(1);
     update_controller(2);
