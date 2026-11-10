@@ -2,6 +2,7 @@
 #include <macros.h>
 #include <defines.h>
 #include "main.h"
+#include "buffers/random.h"
 #include "menus.h"
 #include "racing/math_util.h"
 #include "racing/actors_extended.h"
