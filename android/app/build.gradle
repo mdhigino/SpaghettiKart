@@ -18,9 +18,24 @@ android {
         }
     }
 
+    // Fixed signing key (family-only app, not a secret): every CI build is signed the same way,
+    // so a new APK installs over the old one and keeps the game files in Android/data.
+    signingConfigs {
+        family {
+            storeFile file('family.jks')
+            storePassword 'mk64family'
+            keyAlias 'mk64family'
+            keyPassword 'mk64family'
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig signingConfigs.family
+        }
         release {
             minifyEnabled false
+            signingConfig signingConfigs.family
         }
     }
 
