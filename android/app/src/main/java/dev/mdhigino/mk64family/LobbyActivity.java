@@ -342,6 +342,16 @@ public class LobbyActivity extends Activity {
         go.setOnClickListener(v -> createRoom(online));
         right.addView(go, new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT));
+        View join = bigButton(this, YELLOW, "ENTRAR EM UMA SALA", null, true);
+        ((TextView) ((LinearLayout) join).getChildAt(0)).setGravity(Gravity.CENTER);
+        join.setOnClickListener(v -> {
+            joinOnline = online;
+            showJoin();
+        });
+        LinearLayout.LayoutParams jp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT);
+        jp.setMargins(0, px(1.2f), 0, 0);
+        right.addView(join, jp);
         LinearLayout.LayoutParams rp = weight(1f);
         rp.setMargins(px(3f), 0, 0, 0);
         cols.addView(right, rp);
