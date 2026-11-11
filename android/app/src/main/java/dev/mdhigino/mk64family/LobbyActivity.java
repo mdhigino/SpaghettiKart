@@ -1,7 +1,9 @@
 package dev.mdhigino.mk64family;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -13,6 +15,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.os.Bundle;
@@ -535,6 +538,18 @@ public class LobbyActivity extends Activity {
         LinearLayout right = column();
         right.setPadding(px(1.7f), px(1.3f), px(1.7f), px(1.3f));
         panel(right, false);
+        right.addView(label("ARQUIVO DO JOGO (mk64.o2r)"));
+        right.addView(summary(gameFileStatus(), false));
+        TextView imp = chip(this, "IMPORTAR mk64.o2r", false);
+        imp.setOnClickListener(v -> {
+            Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            i.addCategory(Intent.CATEGORY_OPENABLE);
+            i.setType("*/*");
+            startActivityForResult(i, 77);
+        });
+        LinearLayout impRow = rowOf();
+        impRow.addView(imp);
+        right.addView(impRow);
         right.addView(label("SEU ENDEREÇO NO WI-FI"));
         right.addView(summary(localIp(), false));
         right.addView(label("SOBRE"));
@@ -545,6 +560,44 @@ public class LobbyActivity extends Activity {
         cols.addView(right, rp);
 
         page("options", "OPÇÕES", "AJUSTES DO APP", null, cols, "Toque em salvar para guardar");
+    }
+
+    // ------------------------------------------------------------------ game file
+
+    private String gameFileStatus() {
+        File d = getExternalFilesDir(null);
+        File f = d == null ? null : new File(d, "mk64.o2r");
+        if (f != null && f.isFile() && f.length() > 1000000L) {
+            return "OK (" + (f.length() / 1048576L) + " MB)";
+        }
+        return "Não encontrado";
+    }
+
+    @Override
+    protected void onActivityResult(int req, int res, Intent data) {
+        super.onActivityResult(req, res, data);
+        if (req != 77 || res != RESULT_OK || data == null || data.getData() == null) {
+            return;
+        }
+        try {
+            File d = getExternalFilesDir(null);
+            File tmp = new File(d, "mk64.o2r.tmp");
+            try (InputStream in = getContentResolver().openInputStream(data.getData());
+                 FileOutputStream out = new FileOutputStream(tmp)) {
+                byte[] buf = new byte[65536];
+                int n;
+                while ((n = in.read(buf)) > 0) {
+                    out.write(buf, 0, n);
+                }
+            }
+            File dst = new File(d, "mk64.o2r");
+            if (dst.exists()) dst.delete();
+            tmp.renameTo(dst);
+            Toast.makeText(this, "Arquivo do jogo importado!", Toast.LENGTH_LONG).show();
+        } catch (Throwable t) {
+            Toast.makeText(this, "Não consegui importar o arquivo.", Toast.LENGTH_LONG).show();
+        }
+        showOptions();
     }
 
     // ------------------------------------------------------------------ actions
