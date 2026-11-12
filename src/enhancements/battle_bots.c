@@ -45,16 +45,15 @@ void BattleBots_Prepare(void) {
     if ((gModeSelection != BATTLE) || !Netplay_BattleAI()) {
         return;
     }
-    humans = gPlayerCountSelection1;
-    if (humans < 2) {
-        humans = 2; // Battle always has at least two karts on screen
-    }
+    // People = phones in the room; a single phone playing alone is one person against the bots.
+    humans = Netplay_Active() ? Netplay_PlayerCount() : 1;
     if (humans >= BOT_SLOTS) {
         return;
     }
     for (i = 0; i < humans; i++) {
         used[gCharacterSelections[i] & 7] = 1;
     }
+    Netplay_Log("battle bots: people=%d screens=%d", (int) humans, (int) gPlayerCountSelection1);
     for (i = humans; i < BOT_SLOTS; i++) {
         sBot[i] = 1;
         for (c = 0; c < 8; c++) {
@@ -67,6 +66,7 @@ void BattleBots_Prepare(void) {
         }
         used[c] = 1;
         gCharacterSelections[i] = (s8) c;
+        Netplay_Log("battle bots: slot %d = character %d", (int) i, (int) c);
     }
 }
 
@@ -77,6 +77,7 @@ void BattleBots_Finish(void) {
         if (sBot[i]) {
             // Same flags a human kart has at the start of a Battle.
             gPlayers[i].type = PLAYER_EXISTS | PLAYER_START_SEQUENCE | PLAYER_HUMAN;
+            Netplay_Log("battle bots: kart %d is now a bot", (int) i);
             reset_state(i);
         }
     }
@@ -193,6 +194,9 @@ static void drive_bot(s32 me) {
 void BattleBots_Drive(void) {
     s32 i;
 
+    if ((gModeSelection != BATTLE) || (gGamestate != RACING)) {
+        return; // leave the pads alone in menus
+    }
     for (i = 0; i < BOT_SLOTS; i++) {
         if (sBot[i]) {
             drive_bot(i);

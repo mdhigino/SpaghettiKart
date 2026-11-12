@@ -57,6 +57,9 @@ int Netplay_FullScreen(void);
 // 1 when the config asks for computer players in Battle (key battle=ai).
 int Netplay_BattleAI(void);
 
+// 1 when a single phone plays Battle against computer players and wants its own screen full size.
+int Netplay_SoloFullScreen(void);
+
 // 1 once a state mismatch between phones has been detected.
 int Netplay_Desynced(void);
 

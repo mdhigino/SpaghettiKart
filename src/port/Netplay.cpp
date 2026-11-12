@@ -787,21 +787,31 @@ int Netplay_FullScreen(void) { return sFullScreen ? 1 : 0; }
 
 // battle=ai in netplay.cfg: empty Battle slots are filled with computer players. Works with or without a
 // network session, so the config is read on its own (once).
-int Netplay_BattleAI(void) {
-    if (sActive) {
-        return sBattleAI ? 1 : 0; // every phone must agree, so the host's choice wins
-    }
-    static int sCached = -1;
-    if (sCached < 0) {
-        Config c;
+static const Config& CachedConfig() {
+    static Config sCfg;
+    static bool sRead = false;
+    if (!sRead) {
+        sRead = true;
 #ifdef __ANDROID__
         const char* path = "/sdcard/Android/data/dev.mdhigino.mk64family/files/netplay.cfg";
 #else
         const char* path = "netplay.cfg";
 #endif
-        sCached = (ReadConfig(path, c) && c.battleAI) ? 1 : 0;
+        ReadConfig(path, sCfg);
     }
-    return sCached;
+    return sCfg;
+}
+
+int Netplay_BattleAI(void) {
+    if (sActive) {
+        return sBattleAI ? 1 : 0; // every phone must agree, so the host's choice wins
+    }
+    return CachedConfig().battleAI ? 1 : 0;
+}
+
+// Full screen for a single phone playing Battle against computer players (no network session).
+int Netplay_SoloFullScreen(void) {
+    return (!sActive && CachedConfig().battleAI && CachedConfig().fullscreen) ? 1 : 0;
 }
 
 int Netplay_Frame(const NetplayInput* local, uint32_t stateHash, NetplayInput* out) {
@@ -881,6 +891,7 @@ int Netplay_Frame(const NetplayInput*, uint32_t, NetplayInput*) { return 0; }
 int Netplay_Desynced(void) { return 0; }
 int Netplay_FullScreen(void) { return 0; }
 int Netplay_BattleAI(void) { return 0; }
+int Netplay_SoloFullScreen(void) { return 0; }
 void Netplay_Stop(void) {}
 }
 
