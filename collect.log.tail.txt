@@ -1,0 +1,23 @@
++ NDK=/usr/local/lib/android/sdk/ndk/30.0.16248370
++ JNI=android/app/src/main/jniLibs/arm64-v8a
++ mkdir -p android/app/src/main/jniLibs/arm64-v8a
++ find build-android -name '*.so' -print
+build-android/_deps/sdl2-build/libSDL2.so
+build-android/libmain.so
++ find build-android '(' -name libmain.so -o -name libSDL2.so -o -name libhidapi.so ')' -exec cp -v '{}' android/app/src/main/jniLibs/arm64-v8a/ ';'
+'build-android/_deps/sdl2-build/libSDL2.so' -> 'android/app/src/main/jniLibs/arm64-v8a/libSDL2.so'
+'build-android/libmain.so' -> 'android/app/src/main/jniLibs/arm64-v8a/libmain.so'
++ ls -l android/app/src/main/jniLibs/arm64-v8a
+total 103848
+-rwxr-xr-x 1 runner runner   5999632 Nov 13 00:43 libSDL2.so
+-rwxr-xr-x 1 runner runner 100358248 Nov 13 00:43 libmain.so
++ test -f android/app/src/main/jniLibs/arm64-v8a/libmain.so
++ test -f android/app/src/main/jniLibs/arm64-v8a/libSDL2.so
++ /usr/local/lib/android/sdk/ndk/30.0.16248370/toolchains/llvm/prebuilt/linux-x86_64/bin/llvm-strip --strip-unneeded android/app/src/main/jniLibs/arm64-v8a/libSDL2.so android/app/src/main/jniLibs/arm64-v8a/libmain.so
+++ find build-android/_deps -maxdepth 1 -type d -name sdl2-src
+++ head -n 1
++ SDL_SRC=build-android/_deps/sdl2-src
++ echo 'SDL source: build-android/_deps/sdl2-src'
+SDL source: build-android/_deps/sdl2-src
++ mkdir -p android/app/src/main/java/org
++ cp -r build-android/_deps/sdl2-src/android-project/app/src/main/java/org/libsdl android/app/src/main/java/org/
