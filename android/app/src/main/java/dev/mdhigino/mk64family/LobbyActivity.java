@@ -260,7 +260,7 @@ public class LobbyActivity extends Activity {
         grid.addView(r1);
         grid.addView(r2);
 
-        TextView ver = text(this, "4 JOGADORES", 1.0f, PAPER, true);
+        TextView ver = text(this, "VERSÃO " + versionTag(), 1.0f, PAPER, true);
         ver.setPadding(px(1.2f), px(0.8f), px(1.2f), px(0.8f));
         ver.setBackground(new Panel(0xFF000000, EDGE, false));
         page("menu", "MK64 FAMÍLIA", "CORRIDA E BATTLE EM CASA", ver, grid, "Toque em uma opção para começar");
@@ -573,6 +573,15 @@ public class LobbyActivity extends Activity {
     }
 
     // ------------------------------------------------------------------ game file
+
+    private String versionTag() {
+        try {
+            String v = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+            return v.substring(v.lastIndexOf('.') + 1);
+        } catch (Throwable t) {
+            return "?";
+        }
+    }
 
     private String gameFileStatus() {
         File d = getExternalFilesDir(null);

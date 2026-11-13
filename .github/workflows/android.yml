@@ -106,7 +106,7 @@ jobs:
           echo "ANDROID_HOME=$ANDROID_HOME"
           ls "$ANDROID_HOME" "$ANDROID_HOME/platforms" || true
           yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
-          gradle -p android assembleDebug --no-daemon --stacktrace
+          gradle -p android assembleDebug --no-daemon --stacktrace -PbuildTag=$(echo "$GITHUB_SHA" | cut -c1-7)
 
       - uses: actions/upload-artifact@v4
         with:
