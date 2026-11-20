@@ -402,8 +402,15 @@ extern s32 gNetplayLocalPlayer;
  * identical) but only DRAWS its own player's view, stretched over the entire display instead of
  * one quarter/half of it. Returns 1 if it drew something, 0 to fall back to the normal split screen.
  */
+// What netplay_render_own_screen drew this frame, so the HUD pass (func_800591B4, which runs after the
+// screens are rendered) can use the same full-screen rules.
+static s32 sOwnScreenValid = 0;
+static s32 sOwnScreenMe = -1;
+static f32 sOwnX0, sOwnY0, sOwnX1, sOwnY1;
+
 static int netplay_render_own_screen(void) {
     static s32 sLogCount = 0;
+    sOwnScreenValid = 0;
     s32 solo = (gModeSelection == BATTLE) && Netplay_SoloFullScreen();
     if (!solo && (!Netplay_Active() || !Netplay_FullScreen())) {
         if (Netplay_Active() && sLogCount++ % 600 == 0) {
@@ -467,6 +474,12 @@ static int netplay_render_own_screen(void) {
     gScreenAspect = aspect;
     gNetplayFullViewport = 0;
     gNetplayLocalPlayer = -1;
+    sOwnScreenValid = 1;
+    sOwnScreenMe = me;
+    sOwnX0 = x0;
+    sOwnY0 = y0;
+    sOwnX1 = x1;
+    sOwnY1 = y1;
     return 1;
 }
 
@@ -922,7 +935,17 @@ void race_logic_loop(void) {
     display_debug_info();
 
     func_802A4300();
+    if (sOwnScreenValid) {
+        gNetplayFullViewport = 1;
+        gNetplayLocalPlayer = sOwnScreenMe;
+        netplay_hud_rect_begin(sOwnX0, sOwnY0, sOwnX1, sOwnY1);
+    }
     func_800591B4();
+    if (sOwnScreenValid) {
+        netplay_hud_rect_end();
+        gNetplayFullViewport = 0;
+        gNetplayLocalPlayer = -1;
+    }
     func_80093E20();
 #if DVDL
     display_dvdl();
