@@ -69,6 +69,7 @@ jobs:
             -DANDROID_PLATFORM=android-24 \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+            -DCMAKE_CXX_SCAN_FOR_MODULES=OFF \
             -DUSE_OPENGLES=ON 2>&1 | tee configure.log
 
       - name: Build native library
