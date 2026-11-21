@@ -548,6 +548,12 @@ public class LobbyActivity extends Activity {
         LinearLayout right = column();
         right.setPadding(px(1.7f), px(1.3f), px(1.7f), px(1.3f));
         panel(right, false);
+        right.addView(label("DIAGNÓSTICO"));
+        TextView shareLog = chip(this, "COMPARTILHAR LOG", false);
+        shareLog.setOnClickListener(v -> shareLog());
+        LinearLayout logRow = rowOf();
+        logRow.addView(shareLog);
+        right.addView(logRow);
         right.addView(label("ARQUIVO DO JOGO (mk64.o2r)"));
         right.addView(summary(gameFileStatus(), false));
         TextView imp = chip(this, "IMPORTAR mk64.o2r", false);
@@ -573,6 +579,33 @@ public class LobbyActivity extends Activity {
     }
 
     // ------------------------------------------------------------------ game file
+
+    /** Sends the end of the game's logs (netplay.log + log-anterior.txt) through the share sheet. */
+    private void shareLog() {
+        StringBuilder sb = new StringBuilder("MK64 Familia versao " + versionTag() + "\n");
+        File d = getExternalFilesDir(null);
+        String[] names = { "netplay.cfg", "netplay.log", "log-anterior.txt" };
+        for (String n : names) {
+            sb.append("\n===== ").append(n).append(" =====\n");
+            try {
+                File f = new File(d, n);
+                long len = f.length();
+                long skip = Math.max(0, len - 30000);
+                try (java.io.RandomAccessFile r = new java.io.RandomAccessFile(f, "r")) {
+                    r.seek(skip);
+                    byte[] buf = new byte[(int) (len - skip)];
+                    r.readFully(buf);
+                    sb.append(new String(buf, "UTF-8"));
+                }
+            } catch (Throwable t) {
+                sb.append("(não encontrado)\n");
+            }
+        }
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("text/plain");
+        i.putExtra(Intent.EXTRA_TEXT, sb.toString());
+        startActivity(Intent.createChooser(i, "Compartilhar log"));
+    }
 
     private String versionTag() {
         try {

@@ -193,6 +193,7 @@ static void drive_bot(s32 me) {
 
 void BattleBots_Drive(void) {
     s32 i;
+    static s32 sLog = 0;
 
     if ((gModeSelection != BATTLE) || (gGamestate != RACING)) {
         return; // leave the pads alone in menus
@@ -200,6 +201,13 @@ void BattleBots_Drive(void) {
     for (i = 0; i < BOT_SLOTS; i++) {
         if (sBot[i]) {
             drive_bot(i);
+            if ((sLog % 300) == 0) {
+                Netplay_Log("bot %d: type=0x%x race=%d speed=%.1f balloons=%d pad=0x%x stick=%d reverse=%d", (int) i,
+                            (unsigned) gPlayers[i].type, (int) gRaceState, (double) gPlayers[i].speed,
+                            (int) gPlayerBalloonCount[i], (unsigned) gControllerPads[i].button,
+                            (int) gControllerPads[i].stick_x, (int) sReverse[i]);
+            }
         }
     }
+    sLog++;
 }
